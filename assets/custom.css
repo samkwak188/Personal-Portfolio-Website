@@ -1,0 +1,166 @@
+/* Modern Reset & Base */
+body {
+    background-color: #050505;
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    color: #e2e8f0;
+}
+
+/* Dash initial loading state (before Mantine mounts) */
+._dash-loading {
+    color: #e2e8f0;
+    font-size: 16px;
+    padding: 24px;
+}
+
+/* Gradient Text Utility */
+.gradient-text {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Glassmorphism Card Effect */
+.glass-card {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Modern Card Hover */
+.card-hover {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    top: 0;
+}
+
+.card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -15px rgba(124, 58, 237, 0.3);
+    border-color: rgba(139, 92, 246, 0.5);
+    z-index: 10;
+}
+
+/* Tab Styling - Floating Pill Design */
+.primary-tabs .mantine-Tabs-tabsList {
+    border-bottom: none !important;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: inline-flex;
+    margin-bottom: 32px;
+}
+
+.primary-tab {
+    background: transparent;
+    color: #94a3b8;
+    border-radius: 999px;
+    border: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    padding: 10px 24px !important;
+}
+
+.primary-tab:hover {
+    color: #f8fafc !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.primary-tab[data-active="true"] {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    font-weight: 600;
+}
+
+.primary-tab[data-active="true"] .mantine-Tabs-tabLabel {
+    color: white !important;
+}
+
+/* Responsive grids */
+.hero-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.feature-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.project-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+/* Engineering modal layout: 2-col desktop, 1-col mobile */
+.engineering-modal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 900px) {
+    .hero-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .project-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .engineering-modal-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .feature-grid,
+    .project-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Hero Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fade-in-delay-1 {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 0.2s forwards;
+}
+
+.animate-fade-in-delay-2 {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 0.4s forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
