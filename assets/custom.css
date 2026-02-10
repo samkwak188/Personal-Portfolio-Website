@@ -7,55 +7,105 @@ body {
     color: #e2e8f0;
 }
 
-/* Dash initial loading state (before Mantine mounts) */
+/* Dash initial loading state */
 ._dash-loading {
     color: #e2e8f0;
     font-size: 16px;
     padding: 24px;
+    font-family: 'Inter', sans-serif;
 }
 
-/* Gradient Text Utility */
+/* Typography & Utilities */
 .gradient-text {
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     color: transparent;
+    font-weight: 800;
+}
+
+.glow-text {
+    text-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+}
+
+.section-kicker {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 13px;
+    color: #a78bfa;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
 /* Glassmorphism Card Effect */
 .glass-card {
-    background: rgba(30, 41, 59, 0.4);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-/* Modern Card Hover */
+.glass-card:hover {
+    border-color: rgba(167, 139, 250, 0.3);
+    box-shadow: 0 12px 40px 0 rgba(124, 58, 237, 0.15);
+}
+
+/* Card Hover Animation */
 .card-hover {
     position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     top: 0;
 }
 
 .card-hover:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px -15px rgba(124, 58, 237, 0.3);
-    border-color: rgba(139, 92, 246, 0.5);
-    z-index: 10;
+    transform: translateY(-6px);
 }
 
-/* Tab Styling - Floating Pill Design */
+/* Metric Chips */
+.metric-chip {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+
+.metric-chip:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Tech Stack Badges */
+.tech-badge {
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    background: rgba(139, 92, 246, 0.1);
+    color: #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.tech-badge:hover {
+    background: rgba(139, 92, 246, 0.25);
+    transform: scale(1.05);
+}
+
+/* Code Preview Panel */
+.code-preview-panel pre {
+    margin: 0 !important;
+    background: transparent !important;
+}
+
+/* Tab Styling - Modern Pills */
 .primary-tabs .mantine-Tabs-tabsList {
     border-bottom: none !important;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(10px);
-    padding: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    padding: 6px;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     display: inline-flex;
-    margin-bottom: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .primary-tab {
@@ -65,18 +115,19 @@ body {
     border: none;
     transition: all 0.2s ease;
     font-weight: 500;
-    padding: 10px 24px !important;
+    padding: 8px 24px !important;
+    font-size: 14px;
 }
 
 .primary-tab:hover {
-    color: #f8fafc !important;
+    color: #e2e8f0 !important;
     background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .primary-tab[data-active="true"] {
     background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
     color: white !important;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
     font-weight: 600;
 }
 
@@ -84,9 +135,48 @@ body {
     color: white !important;
 }
 
-/* Responsive grids */
+/* Social Icons */
+.social-icon {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.social-icon:hover {
+    transform: scale(1.15) rotate(5deg);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-delay-1 {
+    opacity: 0;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+
+.animate-fade-in-delay-2 {
+    opacity: 0;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+}
+
+/* Grids */
 .hero-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: center;
 }
 
 .feature-grid {
@@ -97,59 +187,35 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
-/* Engineering modal layout: 2-col desktop, 1-col mobile */
+.tech-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
 .engineering-modal-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
 @media (max-width: 900px) {
-    .hero-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .feature-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-
-    .project-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-
+    .hero-grid,
+    .feature-grid,
+    .project-grid,
+    .tech-grid,
     .engineering-modal-grid {
         grid-template-columns: 1fr !important;
     }
-}
-
-@media (max-width: 640px) {
-    .feature-grid,
-    .project-grid {
-        grid-template-columns: 1fr !important;
+    
+    .primary-tabs .mantine-Tabs-tabsList {
+        width: 100%;
+        overflow-x: auto;
+        justify-content: flex-start;
+        border-radius: 12px;
     }
-}
-
-/* Hero Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.8s ease-out forwards;
-}
-
-.animate-fade-in-delay-1 {
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out 0.2s forwards;
-}
-
-.animate-fade-in-delay-2 {
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out 0.4s forwards;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -158,7 +224,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
     background: #334155;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

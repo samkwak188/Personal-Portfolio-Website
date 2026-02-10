@@ -152,3 +152,56 @@ ENGINEERING_PROJECTS = [
         ),
     },
 ]
+
+IMPACT_METRICS = [
+    {"label": "Years Building", "value": "3+"},
+    {"label": "Projects Shipped", "value": "20+"},
+    {"label": "Domains", "value": "AI / Full Stack / Robotics"},
+]
+
+TECH_STACK = [
+    {
+        "category": "Frontend",
+        "items": [
+            "React",
+            "Next.js",
+            "Dash",
+            "TypeScript",
+            "Tailwind CSS",
+            "Mantine",
+        ],
+    },
+    {
+        "category": "Backend & Data",
+        "items": [
+            "Python",
+            "Flask",
+            "Node.js",
+            "PostgreSQL",
+            "Prisma",
+            "MongoDB",
+        ],
+    },
+    {
+        "category": "AI & Automation",
+        "items": [
+            "OpenAI APIs",
+            "LangChain",
+            "Computer Vision",
+            "Gradient Boosting",
+            "n8n",
+            "Prompt Engineering",
+        ],
+    },
+    {
+        "category": "DevOps & Tooling",
+        "items": [
+            "Render",
+            "Vercel",
+            "GitHub Actions",
+            "Docker",
+            "Linux",
+            "REST APIs",
+        ],
+    },
+]

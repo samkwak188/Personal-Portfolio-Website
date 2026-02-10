@@ -6,8 +6,9 @@ CARD_STYLE = {
     "height": "100%",
     "display": "flex",
     "flexDirection": "column",
-    "backgroundColor": "rgba(30, 41, 59, 0.3)",  # Darker, tailored background
-    "border": "1px solid rgba(255, 255, 255, 0.08)",
+    # Background is handled by CSS class .glass-card now for better blur
+    "backgroundColor": "transparent", 
+    "border": "none",
 }
 
 TAB_BUTTON_STYLE = {
@@ -16,18 +17,26 @@ TAB_BUTTON_STYLE = {
 }
 
 PAGE_WRAPPER_STYLE = {
-    "backgroundColor": "#050505",  # Deep black/blue
+    "backgroundColor": "#050505",
     "minHeight": "100vh",
     "color": "#e2e8f0",
     "fontFamily": "'Inter', sans-serif",
     "overflowX": "hidden",
-    "backgroundImage": "radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%), radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08), transparent 25%)",
+    # Complex mesh gradient background
+    "backgroundImage": """
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(34, 211, 238, 0.1) 0px, transparent 50%)
+    """,
+    "backgroundAttachment": "fixed",
 }
 
 MANTINE_THEME = {
     "colorScheme": "dark",
     "primaryColor": "violet",
     "fontFamily": "'Inter', sans-serif",
+    "defaultRadius": "md",
     "components": {
         "Card": {
             "styles": {
@@ -39,7 +48,23 @@ MANTINE_THEME = {
         "Button": {
             "styles": {
                 "root": {
-                    "transition": "transform 0.1s ease",
+                    "transition": "transform 0.1s ease, box-shadow 0.2s ease",
+                    "&:hover": {
+                        "transform": "translateY(-1px)",
+                        "boxShadow": "0 4px 12px rgba(0, 0, 0, 0.2)",
+                    },
+                    "&:active": {
+                        "transform": "translateY(0)",
+                    }
+                }
+            }
+        },
+        "Badge": {
+            "styles": {
+                "root": {
+                    "textTransform": "uppercase",
+                    "letterSpacing": "0.5px",
+                    "fontWeight": 700,
                 }
             }
         }
