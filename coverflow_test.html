@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coverflow Test</title>
+    <link rel="stylesheet" href="assets/custom.css">
+    <style>
+        body { padding: 40px; }
+        .test-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #0f0;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: white; margin-bottom: 20px;">Coverflow UI/UX Test</h1>
+    
+    <div class="debug-info" id="debug">
+        Scroll to see debug info...
+    </div>
+
+    <div class="coverflow-root">
+        <div class="coverflow-scroll" id="coverflowScroll">
+            <div class="coverflow-track">
+                <div class="coverflow-item" data-coverflow-item="true">
+                    <div class="test-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        Card 1
+                    </div>
+                </div>
+                <div class="coverflow-item" data-coverflow-item="true">
+                    <div class="test-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        Card 2
+                    </div>
+                </div>
+                <div class="coverflow-item" data-coverflow-item="true">
+                    <div class="test-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        Card 3
+                    </div>
+                </div>
+                <div class="coverflow-item" data-coverflow-item="true">
+                    <div class="test-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        Card 4
+                    </div>
+                </div>
+                <div class="coverflow-item" data-coverflow-item="true">
+                    <div class="test-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        Card 5
+                    </div>
+                </div>
+                <div class="coverflow-item" data-coverflow-item="true">
+                    <div class="test-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                        Card 6
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; color: white;">
+        <h2>Test Instructions:</h2>
+        <ol>
+            <li>Scroll horizontally using mouse wheel or trackpad</li>
+            <li>Try dragging the scrollbar</li>
+            <li>Observe card transformations and reflections</li>
+            <li>Check for clipping, overlap, or jitter</li>
+            <li>Resize browser window to test responsive behavior</li>
+            <li>Check debug info in top-right corner</li>
+        </ol>
+    </div>
+
+    <script src="assets/coverflow.js"></script>
+    <script>
+        // Debug overlay
+        const debugEl = document.getElementById('debug');
+        const scrollEl = document.getElementById('coverflowScroll');
+        
+        scrollEl.addEventListener('scroll', () => {
+            const items = scrollEl.querySelectorAll('[data-coverflow-item="true"]');
+            const centerItem = Array.from(items).find(item => item.classList.contains('is-center'));
+            const centerIndex = centerItem ? Array.from(items).indexOf(centerItem) + 1 : 'none';
+            
+            debugEl.innerHTML = `
+                Scroll: ${Math.round(scrollEl.scrollLeft)}px<br>
+                Center Card: ${centerIndex}<br>
+                Viewport Width: ${window.innerWidth}px<br>
+                Scroll Width: ${scrollEl.scrollWidth}px<br>
+                Items: ${items.length}
+            `;
+        });
+        
+        // Trigger initial update
+        scrollEl.dispatchEvent(new Event('scroll'));
+    </script>
+</body>
+</html>

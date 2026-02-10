@@ -2,11 +2,10 @@
 
 CARD_STYLE = {
     "width": "100%",
-    "minHeight": 420,
+    "minHeight": 380,
     "height": "100%",
     "display": "flex",
     "flexDirection": "column",
-    # Background is handled by CSS class .glass-card now for better blur
     "backgroundColor": "transparent", 
     "border": "none",
 }

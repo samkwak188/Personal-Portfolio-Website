@@ -1,6 +1,6 @@
 """Application callbacks."""
 
-from dash import Input, Output, State
+from dash import Input, Output, State, ctx
 
 from .cards import (
     build_project_cards,
@@ -16,12 +16,16 @@ def register_callbacks(app):
     @app.callback(
         Output("primary-tabs", "value"),
         Input("hero-cta-button", "n_clicks"),
+        Input("brand-home-button", "n_clicks"),
         State("primary-tabs", "value"),
         prevent_initial_call=True,
     )
-    def jump_to_projects_tab(n_clicks, current_tab):
-        if n_clicks:
+    def handle_primary_nav(hero_clicks, home_clicks, current_tab):
+        trigger_id = ctx.triggered_id
+        if trigger_id == "hero-cta-button" and hero_clicks:
             return "projects"
+        if trigger_id == "brand-home-button" and home_clicks:
+            return "landing"
         return current_tab
 
     @app.callback(

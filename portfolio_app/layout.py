@@ -20,14 +20,14 @@ def _build_social_link(icon, href):
     )
 
 
-def _build_section_heading(kicker, title, subtitle):
+def _build_section_heading(kicker, title, subtitle=None):
     return dmc.Stack(
         gap=6,
         mb="xl",
         children=[
             dmc.Text(kicker, className="section-kicker"),
             dmc.Title(title, order=2, c="white", className="glow-text"),
-            dmc.Text(subtitle, c="#94a3b8", size="sm"),
+            dmc.Text(subtitle, c="#94a3b8", size="sm") if subtitle else None,
         ],
     )
 
@@ -68,7 +68,10 @@ def _build_profile_intro() -> html.Div:
                                 variant="dot",
                                 size="lg",
                                 className="animate-fade-in",
-                                styles={"root": {"backgroundColor": "rgba(20, 83, 45, 0.2)", "border": "1px solid rgba(34, 197, 94, 0.2)"}}
+                                styles={
+                                    "root": {"backgroundColor": "rgba(20, 83, 45, 0.2)", "border": "1px solid rgba(34, 197, 94, 0.2)"},
+                                    "label": {"color": "white"},
+                                }
                             ),
                             dmc.Title(
                                 [
@@ -128,6 +131,7 @@ def _build_profile_intro() -> html.Div:
                         style={"height": "100%", "padding": "2rem 0", "justifyContent": "center"}
                     ),
                     dmc.Center(
+                        style={"transform": "translateY(-90px)"},
                         children=[
                             dmc.Box(
                                 className="animate-fade-in",
@@ -138,7 +142,8 @@ def _build_profile_intro() -> html.Div:
                                     "borderRadius": "50%",
                                     "background": "linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.5))",
                                     "padding": "6px",
-                                    "boxShadow": "0 20px 60px rgba(99, 102, 241, 0.25)"
+                                    "boxShadow": "0 20px 60px rgba(99, 102, 241, 0.25)",
+                                    "transform": "translateY(-38px)",
                                 },
                                 children=[
                                     dmc.Avatar(
@@ -200,7 +205,8 @@ def _build_about_content() -> html.Div:
             _build_section_heading(
                 "Discovery",
                 "Beyond the Code",
-                "Execution mindset, data fluency, and product focus from first concept to production delivery.",
+                "I design and ship systems at the intersection of AI, software engineering, and product execution. "
+                "My focus is turning complex ideas into scalable systems that are reliable, measurable, and human-centered.",
             ),
             dmc.SimpleGrid(
                 cols=3,
@@ -209,17 +215,17 @@ def _build_about_content() -> html.Div:
                 children=[
                     _build_feature_item(
                         "Cross-Discipline Execution",
-                        "I don't just write code; I build systems. My background spans robotics hardware, embedded C, and modern full-stack web architectures that integrate AI agents and APIs. I understand the entire stack, from the sensor to the screen.",
+                        "I build end-to-end systems across robotics hardware, embedded software, and full-stack web architecture.",
                         "carbon:ibm-cloud-pak-integration"
                     ),
                     _build_feature_item(
                         "Data-Driven Design",
-                        "Intuition is good; data is better. I leverage analytics, gradient-boosting models, and rigorous testing to ensure my solutions aren't just functional—they're optimized for real-world performance.",
+                        "I use analytics, experimentation, and model-driven decisions to optimize reliability and outcomes.",
                         "carbon:chart-line-data"
                     ),
                     _build_feature_item(
                         "Product Mindset",
-                        "I build for users, not just engineers. Whether it's a rental inspection tool or a video generation pipeline, I focus on clean UX, clear documentation, and solving the actual business problem.",
+                        "I prioritize user clarity, business impact, and execution speed from prototype to production.",
                         "carbon:user-activity"
                     )
                 ]
@@ -228,7 +234,6 @@ def _build_about_content() -> html.Div:
             _build_section_heading(
                 "Inventory",
                 "The Tech Stack",
-                "Core technologies I use to ship reliable, scalable, and user-centered products.",
             ),
             dmc.SimpleGrid(
                 cols=2,
@@ -261,11 +266,16 @@ def _build_about_content() -> html.Div:
                 ],
             ),
             dmc.Blockquote(
-                "I care about measurable impact, tight execution, and human-centric polish, whether the interface lives in a browser or on a physical device.",
-                cite="- Changyong Kwak",
-                mt=80,
+                "\"sometimes, the idea that seems the worst turns out to be the best.\"",
+                cite="- Sam Altman",
+                mt=60,
                 color="violet",
-                style={"maxWidth": "800px", "margin": "80px auto", "background": "transparent", "borderLeft": "4px solid #8b5cf6"}
+                style={
+                    "maxWidth": "900px",
+                    "margin": "60px auto 0 auto",
+                    "background": "transparent",
+                    "borderLeft": "4px solid #8b5cf6",
+                },
             ),
         ]
     )
@@ -332,7 +342,7 @@ def _build_projects_section():
                 style={"width": "100%"},
             ),
         ],
-        style={"padding": "40px 0", "maxWidth": "1200px", "margin": "0 auto"}
+        style={"padding": "40px 0", "maxWidth": "1380px", "margin": "0 auto"}
     )
 
 
@@ -402,7 +412,11 @@ def build_layout() -> dmc.MantineProvider:
                 align="center",
                 mt="md",
                 children=[
-                    dmc.Text("CK.", fw=900, size="xl", className="gradient-text", style={"letterSpacing": "-1px"}),
+                    dmc.UnstyledButton(
+                        dmc.Text("CK.", fw=900, size="xl", className="gradient-text", style={"letterSpacing": "-1px"}),
+                        id="brand-home-button",
+                        style={"cursor": "pointer"},
+                    ),
                     dmc.Text(
                         f"Build: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')} UTC",
                         size="xs",
