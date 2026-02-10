@@ -160,9 +160,18 @@
     var dragStartX = 0;
     var dragScrollStart = 0;
 
+    var dragHasMoved = false;
+    var DRAG_THRESHOLD = 5;
+
     function onPointerDown(event) {
       if (event.button && event.button !== 0) return;
+      /* Allow normal clicks on interactive elements (buttons, links) */
+      var tgt = event.target;
+      if (tgt && tgt.closest && tgt.closest("a, button, [role='button'], input, textarea, select")) {
+        return;
+      }
       isDragging = true;
+      dragHasMoved = false;
       dragStartX = event.clientX != null ? event.clientX : event.touches[0].clientX;
       dragScrollStart = scrollEl.scrollLeft;
       scrollEl.style.cursor = "grabbing";
@@ -173,8 +182,10 @@
 
     function onPointerMove(event) {
       if (!isDragging) return;
-      event.preventDefault();
       var x = event.clientX != null ? event.clientX : event.touches[0].clientX;
+      if (!dragHasMoved && Math.abs(x - dragStartX) < DRAG_THRESHOLD) return;
+      dragHasMoved = true;
+      event.preventDefault();
       scrollEl.scrollLeft = dragScrollStart + (dragStartX - x);
       schedule();
     }

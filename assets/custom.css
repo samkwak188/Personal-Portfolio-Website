@@ -260,12 +260,9 @@ body {
 .coverflow-surface {
     height: 100%;
     position: relative;
-    transform-style: preserve-3d;
     will-change: transform;
     transform-origin: center center;
     transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
 }
 
 .coverflow-shadow {
