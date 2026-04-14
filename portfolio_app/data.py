@@ -2,6 +2,62 @@
 
 CODING_PROJECTS = [
     {
+        "title": "TableUs",
+        "image_src": "/assets/tableus.png",
+        "image_alt": "Location-Aware Restaurant Planner",
+        "detail_url": "https://github.com/samkwak188/Tableus-ai-agent",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/Tableus-ai-agent",
+        "accent": "#1f3a5f",
+        "description": (
+            "Location-aware restaurant planner that ranks nearby spots from natural-language group preferences. "
+            "Uses Google Places and Gemini to merge tastes, explain picks, and analyze food photos."
+        ),
+    },
+    {
+        "title": "AI Hub V2",
+        "image_src": "/assets/aihub.png",
+        "image_alt": "Multi-Model AI Chrome Extension",
+        "detail_url": "https://github.com/samkwak188/AI-Hub-v2",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/AI-Hub-v2",
+        "accent": "#24324d",
+        "description": (
+            "Chrome side-panel extension that routes questions and on-screen context to four AI models in parallel. "
+            "Uses a 4-round debate pipeline to stream one verified consensus answer."
+        ),
+    },
+    {
+        "title": "Polymarket Automation",
+        "image_src": "/assets/polymarket.jpg",
+        "image_alt": "AI Prediction Market Trading Bot",
+        "detail_url": "https://github.com/samkwak188/Polymarket-Automation",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/Polymarket-Automation",
+        "accent": "#1f2b45",
+        "description": (
+            "AI-driven Polymarket bot that pairs batch market forecasts with event-driven news classification. "
+            "Adds Gemini probability estimates, Kelly sizing, risk controls, and live telemetry."
+        ),
+    },
+    {
+        "title": "MediMenu",
+        "image_src": "/assets/medimenu.png",
+        "image_alt": "AI Dietary Safety Platform",
+        "detail_url": "https://github.com/samkwak188/MediMenu",
+        "live_url": "https://medimenu-frontend.onrender.com",
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/MediMenu",
+        "accent": "#3b2f47",
+        "description": (
+            "Menu safety platform for diners and restaurants that flags dish risk from allergies, medications, and dietary restrictions. "
+            "Uses GPT-4o vision to digitize menus and publish QR-accessible results."
+        ),
+    },
+    {
         "title": "TrustRent Platform",
         "image_src": "/assets/trustrent.jpg",
         "image_alt": "Enterprise Inspection Workflow",

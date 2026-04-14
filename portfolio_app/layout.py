@@ -1,7 +1,7 @@
 """Application layout assembly."""
 
 import dash_mantine_components as dmc
-from dash import html
+from dash import dcc, html
 from dash_iconify import DashIconify
 from datetime import datetime, timezone
 
@@ -63,7 +63,7 @@ def _build_profile_intro() -> html.Div:
                     dmc.Stack(
                         children=[
                             dmc.Badge(
-                                "Available for Hire",
+                                "Open to Work",
                                 color="green",
                                 variant="dot",
                                 size="lg",
@@ -137,8 +137,8 @@ def _build_profile_intro() -> html.Div:
                                 className="animate-fade-in",
                                 style={
                                     "position": "relative",
-                                    "width": "320px",
-                                    "height": "320px",
+                                    "width": "420px",
+                                    "height": "420px",
                                     "borderRadius": "50%",
                                     "background": "linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.5))",
                                     "padding": "6px",
@@ -437,6 +437,7 @@ def build_layout() -> dmc.MantineProvider:
         withCssVariables=True,
         withGlobalClasses=True,
         children=[
+            dcc.Store(id="tab-nav-scroll-store"),
             *engineering_modals,
             html.Div(main_content, style=PAGE_WRAPPER_STYLE),
         ],

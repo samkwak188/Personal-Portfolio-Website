@@ -224,6 +224,7 @@ def build_cards_grid(card_children: Iterable[html.Div]) -> dmc.SimpleGrid:
         className="coverflow-root",
         children=[
             html.Div(
+                id="projects-coverflow-scroll",
                 className="coverflow-scroll",
                 children=items,
             ),

@@ -13,6 +13,32 @@ from .data import CODING_PROJECTS, ENGINEERING_PROJECTS
 def register_callbacks(app):
     """Attach Dash callbacks to the provided application instance."""
 
+    app.clientside_callback(
+        """
+        function(tab) {
+            if (tab !== "projects") {
+                return window.dash_clientside.no_update;
+            }
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            function resetCoverflow() {
+                var el = document.getElementById("projects-coverflow-scroll");
+                if (el) {
+                    el.scrollLeft = 0;
+                }
+            }
+            resetCoverflow();
+            requestAnimationFrame(resetCoverflow);
+            setTimeout(resetCoverflow, 0);
+            setTimeout(resetCoverflow, 50);
+            setTimeout(resetCoverflow, 150);
+            return window.dash_clientside.no_update;
+        }
+        """,
+        Output("tab-nav-scroll-store", "data"),
+        Input("primary-tabs", "value"),
+        prevent_initial_call=True,
+    )
+
     @app.callback(
         Output("primary-tabs", "value"),
         Input("hero-cta-button", "n_clicks"),
