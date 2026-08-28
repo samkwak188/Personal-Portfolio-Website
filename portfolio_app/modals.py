@@ -15,7 +15,7 @@ def _build_section_header(text, icon):
                 variant="gradient",
                 gradient={"from": "indigo", "to": "cyan"},
             ),
-            dmc.Text(text, fw=700, size="lg", c="white"),
+            dmc.Text(text, fw=700, size="lg", c="#171714"),
         ],
         mb="sm",
         mt="xl",
@@ -36,7 +36,7 @@ def _build_list_item(text):
                 radius="xl",
                 mt=2
             ),
-            dmc.Text(text, size="sm", c="dimmed", style={"flex": 1, "lineHeight": 1.5}),
+            dmc.Text(text, size="sm", c="#66665e", style={"flex": 1, "lineHeight": 1.5}),
         ]
     )
 
@@ -53,7 +53,7 @@ def _build_modal_layout(image_src, content_sections):
                 src=image_src,
                 radius="lg",
                 className="glass-card",
-                style={"border": "1px solid rgba(255,255,255,0.1)"},
+                style={"border": "1px solid #deddd6"},
             ),
             dmc.Stack(
                 gap="sm",
@@ -74,8 +74,8 @@ def get_engineering_modals() -> list[dmc.Modal]:
             zIndex=10000,
             overlayProps={"opacity": 0.55, "blur": 3},
             styles={
-                "modal": {"backgroundColor": "#0f172a", "border": "1px solid rgba(255,255,255,0.1)"},
-                "header": {"backgroundColor": "#0f172a"},
+                "modal": {"backgroundColor": "#fffefa", "border": "1px solid #deddd6"},
+                "header": {"backgroundColor": "#fffefa"},
                 "body": {"padding": "20px"},
             },
             children=_build_modal_layout(
@@ -86,15 +86,15 @@ def get_engineering_modals() -> list[dmc.Modal]:
                         "Kitchen wastewater from Malaysian households and restaurants contains high levels of oils and food particles. "
                         "Direct disposal leads to clogged sewers, unpleasant odors, and significant water waste.",
                         size="sm",
-                        c="dimmed",
+                        c="#66665e",
                         mb="lg"
                     ),
                     
                     _build_section_header("The Solution", "carbon:idea"),
                     dmc.Text(
-                        "An innovative multi-stage filtration system that separates oils and particulates to recycle wastewater.",
+                        "A multi-stage filtration system that separates oil and food particles so the water can be reused.",
                         size="sm",
-                        c="dimmed",
+                        c="#66665e",
                         mb="lg"
                     ),
 
@@ -113,9 +113,9 @@ def get_engineering_modals() -> list[dmc.Modal]:
                     dmc.Stack(
                         gap=4,
                         children=[
-                            _build_list_item("Significantly reduces water waste"),
-                            _build_list_item("Lowers utility costs for businesses"),
-                            _build_list_item("Prevents sewer infrastructure damage"),
+                            _build_list_item("Reuses water that would otherwise enter the drain"),
+                            _build_list_item("Removes oil before it reaches household plumbing"),
+                            _build_list_item("Uses replaceable carbon and zeolite filter media"),
                         ]
                     ),
                 ]
@@ -130,8 +130,8 @@ def get_engineering_modals() -> list[dmc.Modal]:
             zIndex=10000,
             overlayProps={"opacity": 0.55, "blur": 3},
             styles={
-                "modal": {"backgroundColor": "#0f172a", "border": "1px solid rgba(255,255,255,0.1)"},
-                "header": {"backgroundColor": "#0f172a"},
+                "modal": {"backgroundColor": "#fffefa", "border": "1px solid #deddd6"},
+                "header": {"backgroundColor": "#fffefa"},
                 "body": {"padding": "20px"},
             },
             children=_build_modal_layout(
@@ -142,7 +142,7 @@ def get_engineering_modals() -> list[dmc.Modal]:
                         "First-place winner at the World Robot Olympiad Korea. Inspired by a friend with mobility disabilities, "
                         "this headset brings the immersive 4D cinema experience to those who cannot easily visit theaters.",
                         size="sm",
-                        c="dimmed",
+                        c="#66665e",
                         mb="lg"
                     ),
 
@@ -178,8 +178,8 @@ def get_engineering_modals() -> list[dmc.Modal]:
             zIndex=10000,
             overlayProps={"opacity": 0.55, "blur": 3},
             styles={
-                "modal": {"backgroundColor": "#0f172a", "border": "1px solid rgba(255,255,255,0.1)"},
-                "header": {"backgroundColor": "#0f172a"},
+                "modal": {"backgroundColor": "#fffefa", "border": "1px solid #deddd6"},
+                "header": {"backgroundColor": "#fffefa"},
                 "body": {"padding": "20px"},
             },
             children=_build_modal_layout(
@@ -200,7 +200,7 @@ def get_engineering_modals() -> list[dmc.Modal]:
                         "Performances at Chung-Jung Church and Holt School for the Disabled. "
                         "Used robotics as a medium for entertainment and STEM education.",
                         size="sm",
-                        c="dimmed",
+                        c="#66665e",
                         mb="lg"
                     ),
 

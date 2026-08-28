@@ -1,444 +1,345 @@
-"""Application layout assembly."""
+"""Single-page portfolio layout."""
+
+from datetime import datetime
 
 import dash_mantine_components as dmc
-from dash import dcc, html
-from dash_iconify import DashIconify
-from datetime import datetime, timezone
+from dash import html
 
-from .cards import build_project_cards, build_engineering_cards, build_cards_grid
-from .data import CODING_PROJECTS, ENGINEERING_PROJECTS, IMPACT_METRICS, TECH_STACK
+from .cards import build_cards_grid, build_project_cards
+from .data import CODING_PROJECTS, CONTACT, EXPERIENCE, FEATURED_WORK, SKILLS
 from .modals import get_engineering_modals
-from .theme import TAB_BUTTON_STYLE, PAGE_WRAPPER_STYLE, MANTINE_THEME
+from .theme import MANTINE_THEME
 
 
-def _build_social_link(icon, href):
-    return dmc.Anchor(
-        DashIconify(icon=icon, width=24, color="#cbd5e1"),
+def _external_props(is_external=True):
+    if not is_external:
+        return {}
+    return {"target": "_blank", "rel": "noopener noreferrer"}
+
+
+def _text_link(label, href, *, external=True, class_name="text-link"):
+    return html.A(
+        [label, html.Span("↗" if external else "↓", className="link-arrow")],
         href=href,
-        target="_blank",
-        className="social-icon",
+        className=class_name,
+        **_external_props(external),
     )
 
 
-def _build_section_heading(kicker, title, subtitle=None):
-    return dmc.Stack(
-        gap=6,
-        mb="xl",
-        children=[
-            dmc.Text(kicker, className="section-kicker"),
-            dmc.Title(title, order=2, c="white", className="glow-text"),
-            dmc.Text(subtitle, c="#94a3b8", size="sm") if subtitle else None,
-        ],
+def _section_heading(number, title, intro=None):
+    children = [
+        html.Div(number, className="section-number"),
+        html.H2(title, className="section-title"),
+    ]
+    if intro:
+        children.append(html.P(intro, className="section-intro"))
+    return html.Header(children, className="section-heading")
+
+
+def _navigation():
+    return html.Header(
+        html.Nav(
+            [
+                html.A("Changyong Kwak", href="#top", className="brand"),
+                html.Div(
+                    [
+                        html.A("Work", href="#work"),
+                        html.A("Experience", href="#experience"),
+                        html.A("Projects", href="#projects"),
+                        html.A("About", href="#about"),
+                        html.A("Resume", href=CONTACT["resume"], target="_blank"),
+                    ],
+                    className="nav-links",
+                ),
+            ],
+            className="nav-inner",
+            **{"aria-label": "Main navigation"},
+        ),
+        className="site-header",
     )
 
 
-def _build_metric_chips():
-    return dmc.Group(
-        gap="sm",
-        mt="lg",
-        children=[
-            dmc.Paper(
-                className="metric-chip",
-                radius="xl",
-                px="md",
-                py="xs",
-                children=[
-                    dmc.Text(metric["value"], fw=700, c="white", size="sm"),
-                    dmc.Text(metric["label"], size="xs", c="#94a3b8"),
-                ],
-            )
-            for metric in IMPACT_METRICS
-        ],
-    )
-
-
-def _build_profile_intro() -> html.Div:
-    return dmc.Container(
-        children=[
-            dmc.SimpleGrid(
-                cols=2,
-                spacing="xl",
-                className="hero-grid",
-                children=[
-                    dmc.Stack(
-                        children=[
-                            dmc.Badge(
-                                "Open to Work",
-                                color="green",
-                                variant="dot",
-                                size="lg",
-                                className="animate-fade-in",
-                                styles={
-                                    "root": {"backgroundColor": "rgba(20, 83, 45, 0.2)", "border": "1px solid rgba(34, 197, 94, 0.2)"},
-                                    "label": {"color": "white"},
-                                }
-                            ),
-                            dmc.Title(
-                                [
-                                    "Building ",
-                                    html.Span("Intelligent Systems", className="gradient-text"),
-                                    " for the Real World."
-                                ],
-                                order=1,
-                                size="3.5rem",
-                                fw=800,
-                                className="animate-fade-in-delay-1",
-                                style={"lineHeight": 1.1, "letterSpacing": "-1px", "color": "white", "marginBottom": "16px"}
-                            ),
-                            dmc.Text(
-                                "Full Stack Engineer",
-                                size="xl",
-                                fw=500,
-                                c="dimmed",
-                                className="animate-fade-in-delay-2"
-                            ),
-                            dmc.Text(
-                                "I bridge the gap between hardware realities and user experiences. "
-                                "From autonomous perception pipelines to high-scale web infrastructure, "
-                                "I design software that is reliable, scalable, and impactful.",
-                                size="lg",
-                                c="#94a3b8",
-                                style={"maxWidth": "600px", "lineHeight": 1.6},
-                                className="animate-fade-in-delay-2"
-                            ),
-                            _build_metric_chips(),
-                            dmc.Group(
-                                children=[
-                                    dmc.Button(
-                                        "View Projects",
-                                        variant="gradient",
-                                        gradient={"from": "indigo", "to": "cyan"},
-                                        size="md",
-                                        radius="xl",
-                                        id="hero-cta-button",
-                                        rightSection=DashIconify(icon="formkit:arrow-right", width=16),
-                                        className="animate-fade-in-delay-2"
-                                    ),
-                                    dmc.Group(
-                                        gap="xs",
-                                        children=[
-                                            _build_social_link("skill-icons:linkedin", "https://www.linkedin.com/in/changyong-kwak-0b9385314/"),
-                                            _build_social_link("ion:logo-github", "https://github.com/samkwak188"),
-                                        ],
-                                        className="animate-fade-in-delay-2"
-                                    )
-                                ],
-                                gap="xl",
-                                mt="xl",
-                                align="center"
-                            )
-                        ],
-                        style={"height": "100%", "padding": "2rem 0", "justifyContent": "center"}
-                    ),
-                    dmc.Center(
-                        style={"transform": "translateY(-90px)"},
-                        children=[
-                            dmc.Box(
-                                className="animate-fade-in",
-                                style={
-                                    "position": "relative",
-                                    "width": "420px",
-                                    "height": "420px",
-                                    "borderRadius": "50%",
-                                    "background": "linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.5))",
-                                    "padding": "6px",
-                                    "boxShadow": "0 20px 60px rgba(99, 102, 241, 0.25)",
-                                    "transform": "translateY(-38px)",
-                                },
-                                children=[
-                                    dmc.Avatar(
-                                        src="/assets/profile.png",
-                                        size="100%",
-                                        radius="50%",
-                                        style={"border": "6px solid #0f172a"}
-                                    )
-                                ]
-                            )
-                        ]
-                    )
-                ]
-            )
-        ],
-        size="lg",
-        py=80
-    )
-
-
-def _build_landing_content() -> html.Div:
-    return html.Div(
-        _build_profile_intro(),
-        style={
-            "position": "relative",
-            "minHeight": "85vh",
-            "display": "flex",
-            "alignItems": "center"
-        },
-    )
-
-
-def _build_feature_item(title, description, icon):
-    return dmc.Paper(
-        p="xl",
-        radius="lg",
-        className="glass-card",
-        children=[
-            dmc.ThemeIcon(
-                DashIconify(icon=icon, width=24),
-                size=56,
-                radius="md",
-                variant="light",
-                color="violet",
-                mb="md",
-                style={"backgroundColor": "rgba(139, 92, 246, 0.1)"}
-            ),
-            dmc.Text(title, size="lg", fw=700, c="white", mb="sm"),
-            dmc.Text(description, size="sm", c="dimmed", style={"lineHeight": 1.6})
-        ]
-    )
-
-
-def _build_about_content() -> html.Div:
-    return dmc.Container(
-        size="lg",
-        py=60,
-        children=[
-            _build_section_heading(
-                "Discovery",
-                "Beyond the Code",
-                "I design and ship systems at the intersection of AI, software engineering, and product execution. "
-                "My focus is turning complex ideas into scalable systems that are reliable, measurable, and human-centered.",
-            ),
-            dmc.SimpleGrid(
-                cols=3,
-                spacing="xl",
-                className="feature-grid",
-                children=[
-                    _build_feature_item(
-                        "Cross-Discipline Execution",
-                        "I build end-to-end systems across robotics hardware, embedded software, and full-stack web architecture.",
-                        "carbon:ibm-cloud-pak-integration"
-                    ),
-                    _build_feature_item(
-                        "Data-Driven Design",
-                        "I use analytics, experimentation, and model-driven decisions to optimize reliability and outcomes.",
-                        "carbon:chart-line-data"
-                    ),
-                    _build_feature_item(
-                        "Product Mindset",
-                        "I prioritize user clarity, business impact, and execution speed from prototype to production.",
-                        "carbon:user-activity"
-                    )
-                ]
-            ),
-            dmc.Space(h=60),
-            _build_section_heading(
-                "Inventory",
-                "The Tech Stack",
-            ),
-            dmc.SimpleGrid(
-                cols=2,
-                spacing="xl",
-                className="tech-grid",
-                children=[
-                    dmc.Paper(
-                        className="glass-card",
-                        p="xl",
-                        radius="lg",
-                        children=[
-                            dmc.Text(group["category"], fw=700, c="white", mb="md"),
-                            dmc.Group(
-                                gap="xs",
-                                children=[
-                                    dmc.Badge(
-                                        item,
-                                        variant="light",
-                                        color="violet",
-                                        radius="sm",
-                                        className="tech-badge",
-                                        size="lg"
-                                    )
-                                    for item in group["items"]
-                                ],
-                            ),
-                        ],
-                    )
-                    for group in TECH_STACK
-                ],
-            ),
-            dmc.Blockquote(
-                "\"sometimes, the idea that seems the worst turns out to be the best.\"",
-                cite="- Sam Altman",
-                mt=60,
-                color="violet",
-                style={
-                    "maxWidth": "900px",
-                    "margin": "60px auto 0 auto",
-                    "background": "transparent",
-                    "borderLeft": "4px solid #8b5cf6",
-                },
-            ),
-        ]
-    )
-
-
-def _build_resume_section() -> html.Div:
-    return html.Div(
+def _hero():
+    return html.Section(
         [
-            dmc.Center(
-                html.Iframe(
-                    src="https://drive.google.com/file/d/1PRW91Kvkta2B1gPsh-zwzQw68E3U4qsu/preview",
-                    style={
-                        "width": "100%",
-                        "maxWidth": "900px",
-                        "height": "800px",
-                        "border": "none",
-                        "borderRadius": "12px",
-                        "boxShadow": "0 20px 50px rgba(0,0,0,0.5)"
-                    }
-                )
-            )
+            html.Div(
+                [
+                    html.H1(
+                        "I build dependable software for systems that have to work.",
+                        className="hero-title",
+                    ),
+                    html.P(
+                        "I'm Changyong Kwak, a computer science student at UW-Madison. "
+                        "I build control tools, test infrastructure, and developer systems "
+                        "across robotics and AI.",
+                        className="hero-copy",
+                    ),
+                    html.Div(
+                        [
+                            html.A("See selected work", href="#work", className="button button-primary"),
+                            html.A(
+                                "Download resume",
+                                href=CONTACT["resume"],
+                                target="_blank",
+                                className="button button-secondary",
+                            ),
+                        ],
+                        className="hero-actions",
+                    ),
+                    html.P(
+                        [
+                            html.Span(className="availability-dot"),
+                            "Seeking Winter and Summer 2027 software engineering internships.",
+                        ],
+                        className="availability",
+                    ),
+                ],
+                className="hero-content",
+            ),
+            html.Figure(
+                [
+                    html.Div(
+                        html.Img(
+                            src="/assets/profile.png",
+                            alt="Changyong Kwak at the Cursor Hackathon",
+                            className="hero-photo",
+                        ),
+                        className="hero-photo-frame",
+                    ),
+                    html.Figcaption(
+                        [
+                            html.Span("Madison, Wisconsin"),
+                            html.Span("Cursor Hackathon, 2026"),
+                        ]
+                    ),
+                ],
+                className="hero-figure",
+            ),
         ],
-        style={
-            "padding": "60px 0",
-            "width": "100%",
-        },
+        id="top",
+        className="hero section-shell",
     )
 
 
-def _build_projects_section():
-    coding_cards = build_project_cards(CODING_PROJECTS)
-    initial_grid = build_cards_grid(coding_cards)
+def _flow_diagram(nodes):
+    children = []
+    for index, node in enumerate(nodes):
+        children.append(html.Div(node, className="flow-node"))
+        if index < len(nodes) - 1:
+            children.append(html.Div("→", className="flow-arrow", **{"aria-hidden": "true"}))
+    return html.Div(
+        children,
+        className="flow-diagram",
+        **{"aria-label": "System flow: " + " to ".join(nodes)},
+    )
 
-    return dmc.Stack(
-        children=[
-            dmc.Group(
-                justify="center",
-                mb=50,
-                children=[
-                    dmc.SegmentedControl(
-                        id="project-category-toggle",
-                        value="coding",
-                        data=[
-                            {"label": "Software & AI", "value": "coding"},
-                            {"label": "Robotics & Hardware", "value": "engineering"},
-                        ],
-                        size="md",
-                        radius="xl",
-                        classNames={"root": "glass-card"},
-                        styles={
-                            "root": {
-                                "backgroundColor": "rgba(15, 23, 42, 0.6)",
-                                "border": "1px solid rgba(255,255,255,0.1)",
-                            },
-                            "label": {"color": "#94a3b8", "fontWeight": 500},
-                            "active": {"background": "linear-gradient(135deg, #6366f1, #8b5cf6)"}
-                        }
-                    )
-                ]
+
+def _metric(value, label):
+    return html.Div([html.Strong(value), html.Span(label)], className="work-metric")
+
+
+def _featured_work_item(project):
+    return html.Article(
+        [
+            html.Div(
+                [
+                    html.Div(project["number"], className="work-number"),
+                    html.H3(project["title"]),
+                    html.P(project["context"], className="work-context"),
+                    html.P(project["summary"], className="work-summary"),
+                ],
+                className="work-copy",
             ),
             html.Div(
-                initial_grid,
-                id="projects-grid",
-                style={"width": "100%"},
-            ),
-        ],
-        style={"padding": "40px 0", "maxWidth": "1380px", "margin": "0 auto"}
-    )
-
-
-def _build_primary_tabs():
-    return dmc.Tabs(
-        [
-            dmc.TabsList(
                 [
-                    dmc.TabsTab("Home", value="landing", className="primary-tab"),
-                    dmc.TabsTab("About", value="about", className="primary-tab"),
-                    dmc.TabsTab("Projects", value="projects", className="primary-tab"),
-                    dmc.TabsTab("Resume", value="resume", className="primary-tab"),
+                    _flow_diagram(project["flow"]),
+                    html.P("Failure-aware from input to result", className="diagram-caption"),
                 ],
-                justify="center",
-                className="primary-tabs"
+                className="work-diagram",
             ),
-            dmc.TabsPanel(_build_landing_content(), value="landing"),
-            dmc.TabsPanel(_build_about_content(), value="about"),
-            dmc.TabsPanel(_build_projects_section(), value="projects"),
-            dmc.TabsPanel(_build_resume_section(), value="resume"),
-        ],
-        id="primary-tabs",
-        value="landing",
-        variant="pills",
-        style={"marginTop": "30px"}
-    )
-
-
-def _build_footer():
-    return dmc.Container(
-        size="lg",
-        py="xl",
-        mt="xl",
-        style={"borderTop": "1px solid rgba(255,255,255,0.05)"},
-        children=[
-            dmc.Group(
-                justify="space-between",
-                children=[
-                    dmc.Text(
-                        "© 2026 Changyong Kwak. All rights reserved.",
-                        size="sm",
-                        c="dimmed"
+            html.Div(
+                [
+                    html.Div(
+                        [_metric(value, label) for value, label in project["metrics"]],
+                        className="work-metrics",
                     ),
-                    dmc.Group(
-                        gap="xs",
-                        children=[
-                            dmc.Text("Built with", size="sm", c="dimmed"),
-                            dmc.Badge("Python", size="xs", variant="outline", color="blue"),
-                            dmc.Text("&", size="sm", c="dimmed"),
-                            dmc.Badge("Dash", size="xs", variant="outline", color="cyan"),
-                        ]
-                    )
-                ]
-            )
-        ]
+                    _text_link(
+                        project["link_label"],
+                        project["link"],
+                        external=project["external"],
+                    ),
+                ],
+                className="work-proof",
+            ),
+        ],
+        className="featured-work-item",
     )
 
 
-def build_layout() -> dmc.MantineProvider:
-    """Create the full Dash layout tree."""
-    engineering_modals = get_engineering_modals()
-
-    main_content = dmc.Container(
+def _work_section():
+    return html.Section(
         [
-            dmc.Group(
-                justify="space-between",
-                align="center",
-                mt="md",
-                children=[
-                    dmc.UnstyledButton(
-                        dmc.Text("CK.", fw=900, size="xl", className="gradient-text", style={"letterSpacing": "-1px"}),
-                        id="brand-home-button",
-                        style={"cursor": "pointer"},
-                    ),
-                    dmc.Text(
-                        f"Build: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')} UTC",
-                        size="xs",
-                        c="dimmed",
-                        style={"opacity": 0.5}
-                    ),
-                ]
+            _section_heading(
+                "01",
+                "Selected work",
+                "A few systems I can explain from the API down to the failure cases.",
             ),
-            _build_primary_tabs(),
-            _build_footer()
+            html.Div([_featured_work_item(project) for project in FEATURED_WORK]),
         ],
-        fluid=True,
-        style={"padding": "0 20px", "maxWidth": "1400px", "margin": "0 auto"}
+        id="work",
+        className="content-section section-shell",
     )
 
+
+def _experience_item(item):
+    return html.Article(
+        [
+            html.Div(className="timeline-marker"),
+            html.Div(
+                [
+                    html.H3(item["company"]),
+                    html.P(item["role"], className="experience-role"),
+                    html.P(item["description"], className="experience-description"),
+                ],
+                className="experience-main",
+            ),
+            html.Time(item["dates"], className="experience-dates"),
+        ],
+        className="experience-item",
+    )
+
+
+def _experience_section():
+    return html.Section(
+        [
+            _section_heading("02", "Experience"),
+            html.Div([_experience_item(item) for item in EXPERIENCE], className="timeline"),
+        ],
+        id="experience",
+        className="content-section section-shell",
+    )
+
+
+def _project_archive_section():
+    initial_grid = build_cards_grid(build_project_cards(CODING_PROJECTS))
+    return html.Section(
+        [
+            _section_heading(
+                "03",
+                "Project archive",
+                "Software, robotics, and hardware projects from the last several years.",
+            ),
+            html.Div(
+                dmc.SegmentedControl(
+                    id="project-category-toggle",
+                    value="coding",
+                    data=[
+                        {"label": "Software and AI", "value": "coding"},
+                        {"label": "Robotics and hardware", "value": "engineering"},
+                    ],
+                    className="archive-toggle",
+                    size="md",
+                ),
+                className="archive-controls",
+            ),
+            html.Div(initial_grid, id="projects-grid", className="archive-grid"),
+        ],
+        id="projects",
+        className="content-section project-archive-section",
+    )
+
+
+def _skill_column(title, skills):
+    return html.Div(
+        [html.H3(title), html.P("\n".join(skills), className="skill-list")],
+        className="skill-column",
+    )
+
+
+def _about_section():
+    return html.Section(
+        [
+            _section_heading("04", "About"),
+            html.Div(
+                [
+                    html.P(
+                        "I like the parts of software where good behavior depends on careful "
+                        "boundaries: a canceled robot command, an interrupted evaluation run, "
+                        "or a tool that must fail safely.",
+                        className="about-statement",
+                    ),
+                    html.Div(
+                        [
+                            html.P(
+                                "At UW-Madison, I study computer science and work across robotics, "
+                                "AI systems, and full-stack software. I enjoy tracing a problem "
+                                "through the whole stack, then writing the tests that make the fix stick."
+                            ),
+                            html.P(
+                                "I expect to graduate in December 2027. Outside class, I am usually "
+                                "building a project, reading through an unfamiliar codebase, or helping "
+                                "a teammate turn a rough demo into something reliable."
+                            ),
+                        ],
+                        className="about-copy",
+                    ),
+                ],
+                className="about-grid",
+            ),
+            html.Div(
+                [_skill_column(title, skills) for title, skills in SKILLS.items()],
+                className="skills-grid",
+            ),
+            html.Div(
+                [
+                    html.P("Have a role where this kind of work matters? I'd be glad to talk."),
+                    html.Div(
+                        [
+                            _text_link("Email", CONTACT["email"], external=False),
+                            _text_link("LinkedIn", CONTACT["linkedin"]),
+                            _text_link("GitHub", CONTACT["github"]),
+                            _text_link("Resume", CONTACT["resume"]),
+                        ],
+                        className="contact-links",
+                    ),
+                ],
+                className="contact-block",
+            ),
+        ],
+        id="about",
+        className="content-section section-shell",
+    )
+
+
+def _footer():
+    return html.Footer(
+        [
+            html.P(f"Changyong Kwak · Madison, Wisconsin · {datetime.now().year}"),
+            html.A("Back to top ↑", href="#top"),
+        ],
+        className="site-footer section-shell",
+    )
+
+
+def build_layout():
+    """Create the full Dash layout tree."""
     return dmc.MantineProvider(
         theme=MANTINE_THEME,
         withCssVariables=True,
         withGlobalClasses=True,
         children=[
-            dcc.Store(id="tab-nav-scroll-store"),
-            *engineering_modals,
-            html.Div(main_content, style=PAGE_WRAPPER_STYLE),
+            html.A("Skip to selected work", href="#work", className="skip-link"),
+            *get_engineering_modals(),
+            _navigation(),
+            html.Main(
+                [
+                    _hero(),
+                    _work_section(),
+                    _experience_section(),
+                    _project_archive_section(),
+                    _about_section(),
+                ]
+            ),
+            _footer(),
         ],
     )

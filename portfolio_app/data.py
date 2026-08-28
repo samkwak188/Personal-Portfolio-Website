@@ -2,6 +2,34 @@
 
 CODING_PROJECTS = [
     {
+        "title": "Husk",
+        "image_src": "/assets/husk.png",
+        "image_alt": "Husk dependency security CLI repository preview",
+        "detail_url": "https://github.com/samkwak188/Husk-Agentic-dependency-security-CLI",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/Husk-Agentic-dependency-security-CLI",
+        "accent": "#f0efe9",
+        "description": (
+            "An install-time npm and PyPI security gate that reached 97.3% precision and "
+            "82.8% F1 on a 100-package benchmark. It won Best Technical Depth in 2026."
+        ),
+    },
+    {
+        "title": "Meta Winterfell Contribution",
+        "image_src": "/assets/winterfell.png",
+        "image_alt": "Meta Winterfell open-source repository preview",
+        "detail_url": "https://github.com/facebook/winterfell/pull/407",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/facebook/winterfell/pull/407",
+        "accent": "#f0efe9",
+        "description": (
+            "A Rust contribution that rejects mismatched AIR LDE and FRI domain sizes before "
+            "proof validation, with a typed error for the invalid state."
+        ),
+    },
+    {
         "title": "TableUs",
         "image_src": "/assets/tableus.png",
         "image_alt": "Location-Aware Restaurant Planner",
@@ -11,8 +39,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/Tableus-ai-agent",
         "accent": "#1f3a5f",
         "description": (
-            "Location-aware restaurant planner that ranks nearby spots from natural-language group preferences. "
-            "Uses Google Places and Gemini to merge tastes, explain picks, and analyze food photos."
+            "A group dining app that ranks nearby restaurants from preferences, reviews, "
+            "dietary needs, and live Google Maps data. It won 2nd place at Cursor Hackathon 2026."
         ),
     },
     {
@@ -25,8 +53,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/AI-Hub-v2",
         "accent": "#24324d",
         "description": (
-            "Chrome side-panel extension that routes questions and on-screen context to four AI models in parallel. "
-            "Uses a 4-round debate pipeline to stream one verified consensus answer."
+            "A Chrome side panel that sends a question and the current page context to four "
+            "models, then streams their responses into one final answer."
         ),
     },
     {
@@ -39,8 +67,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/Polymarket-Automation",
         "accent": "#1f2b45",
         "description": (
-            "AI-driven Polymarket bot that pairs batch market forecasts with event-driven news classification. "
-            "Adds Gemini probability estimates, Kelly sizing, risk controls, and live telemetry."
+            "A Polymarket research bot that combines news classification, probability estimates, "
+            "Kelly sizing, risk limits, and live run telemetry."
         ),
     },
     {
@@ -53,8 +81,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/MediMenu",
         "accent": "#3b2f47",
         "description": (
-            "Menu safety platform for diners and restaurants that flags dish risk from allergies, medications, and dietary restrictions. "
-            "Uses GPT-4o vision to digitize menus and publish QR-accessible results."
+            "A menu tool that flags possible conflicts with allergies, medications, and dietary "
+            "restrictions. Restaurants can digitize a menu and share the result by QR code."
         ),
     },
     {
@@ -67,22 +95,22 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/TrustRent---Madhacks2025",
         "accent": "#1a3a4a",
         "description": (
-            "Engineered an enterprise-grade inspection workflow with secure verification and cloud storage integration. "
-            "Facilitates portfolio-wide audits through structured data collection and Postgres-backed persistence."
+            "A rental inspection workflow for collecting verified photos, storing structured "
+            "records, and reviewing inspections across a property portfolio."
         ),
     },
     {
         "title": "ClearMove Evidence Kit",
         "image_src": "/assets/clearmove.jpeg",
         "image_alt": "Property Management Solution",
-        "detail_url": "https://github.com/samkwak188/2025-Badger-Build-Hackathon---ClearMove",
+        "detail_url": "https://github.com/samkwak188/ClearMove-Final----Madhacks2025",
         "live_url": "https://cleanmove.onrender.com",
         "demo_url": None,
-        "github_url": "https://github.com/samkwak188/2025-Badger-Build-Hackathon---ClearMove",
+        "github_url": "https://github.com/samkwak188/ClearMove-Final----Madhacks2025",
         "accent": "#1a3f6f",
         "description": (
-            "Developed a comprehensive property management solution integrating LLM-powered analysis for lease summarization. "
-            "Streamlines inspection workflows with digitized checklists and automated PDF reporting."
+            "A rental inspection app that creates timestamped move-in and move-out evidence "
+            "packets. It won 3rd place out of 92 teams at Badger Build 2025."
         ),
     },
     {
@@ -95,8 +123,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/MadLuv---MadData-Hackathon-2025-Project",
         "accent": "#5c1a3a",
         "description": (
-            "Designed a data-driven matchmaking platform using gradient boosting algorithms trained on behavioral datasets. "
-            "Securely connects university students while providing AI-curated compatibility insights."
+            "A student matchmaking app with verified university sign-in and a recommendation "
+            "pipeline built from profile and preference data."
         ),
     },
     {
@@ -109,8 +137,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/Wisconsin-Autonomous-Perception-Coding-Challenge",
         "accent": "#2a3a1a",
         "description": (
-            "Implemented a robust perception pipeline for autonomous navigation, utilizing HSV segmentation and geometric heuristics. "
-            "Includes RANSAC-guided lane detection to ensure reliable vehicle path planning."
+            "A lane perception exercise using HSV segmentation, geometric filters, and RANSAC "
+            "to recover a usable road boundary from a sample driving image."
         ),
     },
     {
@@ -123,8 +151,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/Image-Crawler-with-Face-detection",
         "accent": "#1a2a4a",
         "description": (
-            "Created a specialized data acquisition tool with integrated face detection algorithms. "
-            "Automates the collection and filtering of high-quality datasets for machine learning applications."
+            "A crawler that collects images and filters them with face detection, reducing the "
+            "manual cleanup needed before building a small vision dataset."
         ),
     },
     {
@@ -137,8 +165,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/AI-Face-Type-Analyzer",
         "accent": "#3a1a5a",
         "description": (
-            "Built a computer vision application deploying custom CNN models to classify facial structures. "
-            "Provides users with detailed morphological analysis through an intuitive, responsive web interface."
+            "A web app that runs a small image classifier and returns a simple face-shape result "
+            "through a responsive browser interface."
         ),
     },
     {
@@ -146,13 +174,13 @@ CODING_PROJECTS = [
         "image_src": "/assets/faketextstory.png",
         "image_alt": "Text Story Generator",
         "detail_url": "https://my-service-662964498291.us-central1.run.app",
-        "live_url": "https://my-service-662964498291.us-central1.run.app",
+        "live_url": None,
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/Fake-Text-Story-Video-Generator---Complete-Version",
         "accent": "#1a3050",
         "description": (
-            "Architected a scalable video generation service transforming text narratives into engaging social media formats. "
-            "Deployed on cloud infrastructure to handle high-concurrency rendering tasks efficiently."
+            "A cloud service that turns a text conversation into a captioned short video, "
+            "including layout, timing, and server-side rendering."
         ),
     },
     {
@@ -165,8 +193,8 @@ CODING_PROJECTS = [
         "github_url": "https://github.com/samkwak188/GoViral-Wizard---youtube-shorts-tiktok-video-creator",
         "accent": "#6a2a1a",
         "description": (
-            "Developed an automated content pipeline that synthesizes viral short-form videos from text prompts. "
-            "Integrates dynamic asset selection, voice synthesis, and automated editing to streamline content creation workflows."
+            "A short-video workflow that combines voiceover, captions, background media, FFmpeg "
+            "rendering, and publishing in one tool."
         ),
     },
     {
@@ -174,13 +202,13 @@ CODING_PROJECTS = [
         "image_src": "/assets/epl.png",
         "image_alt": "Predictive Analytics Dashboard",
         "detail_url": "https://epl-match-result-predictor-3.onrender.com",
-        "live_url": "https://epl-match-result-predictor-3.onrender.com",
+        "live_url": None,
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/EPL-Match-Result-Predictor",
         "accent": "#1a1a3a",
         "description": (
-            "Engineered a predictive analytics platform leveraging custom ML models to forecast English Premier League outcomes. "
-            "Features real-time data ingestion and visualization to provide actionable insights for sports analysis."
+            "A match prediction app that cleans football data, runs a trained model, and presents "
+            "English Premier League forecasts in a browser dashboard."
         ),
     },
 ]
@@ -193,8 +221,8 @@ ENGINEERING_PROJECTS = [
         "image_alt": "Environmental Engineering Prototype",
         "accent": "#2a3a2a",
         "description": (
-            "Designed and prototyped a filtration system addressing commercial and residential wastewater challenges. "
-            "Engineered a multi-stage separation mechanism to effectively isolate oils and particulates for sustainable water reuse."
+            "A working multi-stage purifier that separates oil and food particles from kitchen "
+            "wastewater using mechanical filtration and absorbent media."
         ),
     },
     {
@@ -204,8 +232,8 @@ ENGINEERING_PROJECTS = [
         "image_alt": "Embedded Systems Project",
         "accent": "#3a2a1a",
         "description": (
-            "Developed an immersive cinematic headset integrating synchronized environmental effects. "
-            "Programmed embedded C controllers to coordinate servo motors and actuators for real-time sensory feedback."
+            "A home cinema helmet that synchronizes motion, mist, light, and scent with video. "
+            "The project won first place at World Robot Olympiad Korea."
         ),
     },
     {
@@ -215,8 +243,8 @@ ENGINEERING_PROJECTS = [
         "image_alt": "Robotics Control System",
         "accent": "#1a2a3a",
         "description": (
-            "Engineered a bipedal humanoid robot with custom gait generation and motion planning algorithms in C. "
-            "Fabricated components via 3D printing and optimized servo control for stability during complex dynamic movements."
+            "A set of small humanoid robots programmed in C to perform synchronized movement. "
+            "I tuned servo sequences and fabricated replacement parts with a 3D printer."
         ),
     },
 ]
@@ -299,3 +327,134 @@ TECH_STACK = [
         ],
     },
 ]
+
+
+# Employer-facing content. The complete project archive above remains available in
+# the coverflow section; these records provide a focused first read.
+CONTACT = {
+    "email": "mailto:ckwak7@wisc.edu",
+    "linkedin": "https://www.linkedin.com/in/changyong-kwak/",
+    "github": "https://github.com/samkwak188",
+    "resume": "/assets/changyong-kwak-resume.pdf",
+}
+
+FEATURED_WORK = [
+    {
+        "number": "01",
+        "title": "Robot control platform",
+        "context": "Contoro Robotics",
+        "summary": (
+            "A browser-to-robot control service for three Isaac Sim robots. I built the "
+            "React and TypeScript interface and the FastAPI service that carried commands "
+            "through ROS 2, then tested cancellation, timeouts, and concurrent requests."
+        ),
+        "flow": ["React + TypeScript", "FastAPI", "ROS 2", "Isaac Sim"],
+        "metrics": [
+            ("3", "robots"),
+            ("13", "REST endpoints"),
+            ("27", "automated tests"),
+            ("4", "production adapter modes"),
+        ],
+        "link_label": "See the experience",
+        "link": "#experience",
+        "external": False,
+    },
+    {
+        "number": "02",
+        "title": "Brick Agent Harness",
+        "context": "N+1 Institute at UW-Madison",
+        "summary": (
+            "A local evaluation platform for tool-using agents. It keeps model behavior "
+            "separate from typed tools, graders, and immutable run evidence so experiments "
+            "can be repeated and audited."
+        ),
+        "flow": ["Domain packs", "Typed executor", "Strict graders", "Run evidence"],
+        "metrics": [
+            ("528", "synthetic cases"),
+            ("11", "task families"),
+            ("3", "versioned domain packs"),
+            ("461", "ARM64 tests passed"),
+        ],
+        "link_label": "View the repository",
+        "link": "https://github.com/EdgeHarness/Brick-Agent-Harness",
+        "external": True,
+    },
+    {
+        "number": "03",
+        "title": "LiveClaw",
+        "context": "Independent project",
+        "summary": (
+            "A desktop control loop that observes the screen, takes an action, and checks "
+            "the result. The Rust and Python stack pauses for input conflicts and blocks "
+            "or confirms risky actions."
+        ),
+        "flow": ["Observe", "Plan", "Act", "Verify"],
+        "metrics": [
+            ("3", "control layers"),
+            ("5", "safety mechanisms"),
+            ("2-stage", "screenshot verification"),
+            ("Rust + Python", "implementation"),
+        ],
+        "link_label": "View the repository",
+        "link": "https://github.com/samkwak188/LiveClaw",
+        "external": True,
+    },
+]
+
+EXPERIENCE = [
+    {
+        "company": "Contoro Robotics",
+        "role": "Software Engineering Intern",
+        "dates": "Feb 2026 - Jul 2026",
+        "description": (
+            "Built a browser-based robot control service across React, FastAPI, ROS 2, "
+            "and Isaac Sim. Focused on concurrency, cancellation, timeout recovery, and "
+            "repeatable CI checks."
+        ),
+    },
+    {
+        "company": "N+1 Institute at UW-Madison",
+        "role": "AI Research and Software Engineering Intern",
+        "dates": "Jun 2026 - Aug 2026",
+        "description": (
+            "Built Brick, a local evaluation harness for tool-using agents, while working "
+            "with Brix Coworking and technical mentors from Qualcomm. Qualified 528 "
+            "synthetic cases and hardened evidence recovery on Windows ARM64."
+        ),
+    },
+    {
+        "company": "CATS Lab at UW-Madison",
+        "role": "Undergraduate Researcher",
+        "dates": "May 2026 - Present",
+        "description": (
+            "Researching how fixed-camera drift changes downstream traffic measurements. "
+            "Also reproduced an upstream PyTorch Transformer on 97,499 observations and "
+            "documented a session-label confound before making a generalization claim."
+        ),
+    },
+    {
+        "company": "GoViral",
+        "role": "Creator and Full-Stack Developer",
+        "dates": "Oct 2024 - Feb 2026",
+        "description": (
+            "Built and ran a cloud video workflow used by 40+ beta users. Automated rendering, "
+            "captions, voiceover, and publishing to cut a typical workflow from about two "
+            "hours to under ten minutes."
+        ),
+    },
+]
+
+SKILLS = {
+    "Languages": ["Python", "TypeScript", "Rust", "Java", "C / C++", "SQL", "Go"],
+    "Systems and tools": [
+        "FastAPI",
+        "React / Next.js",
+        "ROS 2",
+        "PostgreSQL",
+        "Docker",
+        "Kubernetes",
+        "GitHub Actions",
+        "Linux",
+        "PyTorch",
+    ],
+}

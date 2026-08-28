@@ -1,11 +1,15 @@
-# Portfolio Website
+# Changyong Kwak's Portfolio
 
-My personal portfolio website built with Dash and Mantine components.
+A focused portfolio for my software engineering work across robotics controls, AI evaluation, and developer tools. The site is a responsive single-page Dash application.
 
 https://ckwaksam.onrender.com/
 
-## Technologies Used
-- Python
-- Dash
-- Dash Mantine Components
-- CSS
+## Run locally
+
+```bash
+python -m venv .venv
+python -m pip install -r requirements.txt
+python app.py
+```
+
+Then open `http://127.0.0.1:8050`.
