@@ -31,7 +31,7 @@ CODING_PROJECTS = [
     },
     {
         "title": "TableUs",
-        "image_src": "/assets/tableus.png",
+        "image_src": "/assets/tableus-latest.png",
         "image_alt": "Location-Aware Restaurant Planner",
         "detail_url": "https://github.com/samkwak188/Tableus-ai-agent",
         "live_url": None,
@@ -340,7 +340,6 @@ CONTACT = {
 
 FEATURED_WORK = [
     {
-        "number": "01",
         "title": "Robot control platform",
         "context": "Contoro Robotics",
         "summary": (
@@ -349,18 +348,11 @@ FEATURED_WORK = [
             "through ROS 2, then tested cancellation, timeouts, and concurrent requests."
         ),
         "flow": ["React + TypeScript", "FastAPI", "ROS 2", "Isaac Sim"],
-        "metrics": [
-            ("3", "robots"),
-            ("13", "REST endpoints"),
-            ("27", "automated tests"),
-            ("4", "production adapter modes"),
-        ],
         "link_label": "See the experience",
         "link": "#experience",
         "external": False,
     },
     {
-        "number": "02",
         "title": "Brick Agent Harness",
         "context": "N+1 Institute at UW-Madison",
         "summary": (
@@ -369,18 +361,11 @@ FEATURED_WORK = [
             "can be repeated and audited."
         ),
         "flow": ["Domain packs", "Typed executor", "Strict graders", "Run evidence"],
-        "metrics": [
-            ("528", "synthetic cases"),
-            ("11", "task families"),
-            ("3", "versioned domain packs"),
-            ("461", "ARM64 tests passed"),
-        ],
         "link_label": "View the repository",
         "link": "https://github.com/EdgeHarness/Brick-Agent-Harness",
         "external": True,
     },
     {
-        "number": "03",
         "title": "LiveClaw",
         "context": "Independent project",
         "summary": (
@@ -389,12 +374,6 @@ FEATURED_WORK = [
             "or confirms risky actions."
         ),
         "flow": ["Observe", "Plan", "Act", "Verify"],
-        "metrics": [
-            ("3", "control layers"),
-            ("5", "safety mechanisms"),
-            ("2-stage", "screenshot verification"),
-            ("Rust + Python", "implementation"),
-        ],
         "link_label": "View the repository",
         "link": "https://github.com/samkwak188/LiveClaw",
         "external": True,

@@ -26,11 +26,8 @@ def _text_link(label, href, *, external=True, class_name="text-link"):
     )
 
 
-def _section_heading(number, title, intro=None):
-    children = [
-        html.Div(number, className="section-number"),
-        html.H2(title, className="section-title"),
-    ]
+def _section_heading(title, intro=None):
+    children = [html.H2(title, className="section-title")]
     if intro:
         children.append(html.P(intro, className="section-intro"))
     return html.Header(children, className="section-heading")
@@ -43,11 +40,11 @@ def _navigation():
                 html.A("Changyong Kwak", href="#top", className="brand"),
                 html.Div(
                     [
-                        html.A("Work", href="#work"),
-                        html.A("Experience", href="#experience"),
-                        html.A("Projects", href="#projects"),
-                        html.A("About", href="#about"),
-                        html.A("Resume", href=CONTACT["resume"], target="_blank"),
+                        html.A("About", href="#about", className="nav-about"),
+                        html.A("Work", href="#work", className="nav-work"),
+                        html.A("Experience", href="#experience", className="nav-experience"),
+                        html.A("Projects", href="#projects", className="nav-projects"),
+                        html.A("Resume", href=CONTACT["resume"], target="_blank", className="nav-resume"),
                     ],
                     className="nav-links",
                 ),
@@ -134,19 +131,19 @@ def _flow_diagram(nodes):
     )
 
 
-def _metric(value, label):
-    return html.Div([html.Strong(value), html.Span(label)], className="work-metric")
-
-
 def _featured_work_item(project):
     return html.Article(
         [
             html.Div(
                 [
-                    html.Div(project["number"], className="work-number"),
                     html.H3(project["title"]),
                     html.P(project["context"], className="work-context"),
                     html.P(project["summary"], className="work-summary"),
+                    _text_link(
+                        project["link_label"],
+                        project["link"],
+                        external=project["external"],
+                    ),
                 ],
                 className="work-copy",
             ),
@@ -157,20 +154,6 @@ def _featured_work_item(project):
                 ],
                 className="work-diagram",
             ),
-            html.Div(
-                [
-                    html.Div(
-                        [_metric(value, label) for value, label in project["metrics"]],
-                        className="work-metrics",
-                    ),
-                    _text_link(
-                        project["link_label"],
-                        project["link"],
-                        external=project["external"],
-                    ),
-                ],
-                className="work-proof",
-            ),
         ],
         className="featured-work-item",
     )
@@ -180,7 +163,6 @@ def _work_section():
     return html.Section(
         [
             _section_heading(
-                "01",
                 "Selected work",
                 "A few systems I can explain from the API down to the failure cases.",
             ),
@@ -212,7 +194,7 @@ def _experience_item(item):
 def _experience_section():
     return html.Section(
         [
-            _section_heading("02", "Experience"),
+            _section_heading("Experience"),
             html.Div([_experience_item(item) for item in EXPERIENCE], className="timeline"),
         ],
         id="experience",
@@ -225,7 +207,6 @@ def _project_archive_section():
     return html.Section(
         [
             _section_heading(
-                "03",
                 "Project archive",
                 "Software, robotics, and hardware projects from the last several years.",
             ),
@@ -259,7 +240,7 @@ def _skill_column(title, skills):
 def _about_section():
     return html.Section(
         [
-            _section_heading("04", "About"),
+            _section_heading("About"),
             html.Div(
                 [
                     html.P(
@@ -290,24 +271,30 @@ def _about_section():
                 [_skill_column(title, skills) for title, skills in SKILLS.items()],
                 className="skills-grid",
             ),
-            html.Div(
-                [
-                    html.P("Have a role where this kind of work matters? I'd be glad to talk."),
-                    html.Div(
-                        [
-                            _text_link("Email", CONTACT["email"], external=False),
-                            _text_link("LinkedIn", CONTACT["linkedin"]),
-                            _text_link("GitHub", CONTACT["github"]),
-                            _text_link("Resume", CONTACT["resume"]),
-                        ],
-                        className="contact-links",
-                    ),
-                ],
-                className="contact-block",
-            ),
         ],
         id="about",
         className="content-section section-shell",
+    )
+
+
+def _contact_section():
+    return html.Section(
+        html.Div(
+            [
+                html.P("Have a role where this kind of work matters? I'd be glad to talk."),
+                html.Div(
+                    [
+                        _text_link("Email", CONTACT["email"], external=False),
+                        _text_link("LinkedIn", CONTACT["linkedin"]),
+                        _text_link("GitHub", CONTACT["github"]),
+                        _text_link("Resume", CONTACT["resume"]),
+                    ],
+                    className="contact-links",
+                ),
+            ],
+            className="contact-block",
+        ),
+        className="contact-section section-shell",
     )
 
 
@@ -328,16 +315,17 @@ def build_layout():
         withCssVariables=True,
         withGlobalClasses=True,
         children=[
-            html.A("Skip to selected work", href="#work", className="skip-link"),
+            html.A("Skip to main content", href="#about", className="skip-link"),
             *get_engineering_modals(),
             _navigation(),
             html.Main(
                 [
                     _hero(),
+                    _about_section(),
                     _work_section(),
                     _experience_section(),
                     _project_archive_section(),
-                    _about_section(),
+                    _contact_section(),
                 ]
             ),
             _footer(),
