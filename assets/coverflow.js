@@ -1,249 +1,290 @@
-/* Cover Flow controller — zero-reflow, index-math approach
-   Inspired by github.com/addyosmani/threejs-coverflow
-   and scroll-driven-animations.style/demos/cover-flow/css/ */
+/* Original Cover Flow controller — zero-reflow, index-math approach.
+   The transform curve and timing intentionally match the portfolio's pre-redesign gallery. */
 (function () {
   "use strict";
 
-  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-
-  function getItems(el) {
-    return Array.from(el.querySelectorAll("[data-coverflow-item='true']"));
+  function clamp(value, low, high) {
+    return Math.max(low, Math.min(high, value));
   }
 
-  /* ---- cached geometry ---- */
+  function getItems(element) {
+    return Array.from(element.querySelectorAll("[data-coverflow-item='true']"));
+  }
 
-  function cacheGeometry(scrollEl, items) {
-    // Read offsetLeft + offsetWidth once — no per-frame reflow
-    var offsets = [];
-    for (var i = 0; i < items.length; i++) {
-      var it = items[i];
-      offsets.push({
-        left: it.offsetLeft,
-        width: it.offsetWidth,
-        center: it.offsetLeft + it.offsetWidth / 2,
-        surface: it.querySelector(".coverflow-surface"),
-        shadow: it.querySelector(".coverflow-shadow"),
+  function cacheGeometry(scrollElement, items) {
+    var offsets = items.map(function (item) {
+      var width = item.offsetWidth;
+      return {
+        item: item,
+        width: width,
+        center: item.offsetLeft + width / 2,
+        surface: item.querySelector(".coverflow-surface"),
+        shadow: item.querySelector(".coverflow-shadow"),
+        lastTransform: "",
+        lastShadow: "",
+        lastZIndex: "",
+      };
+    });
+    return { viewportWidth: scrollElement.clientWidth, offsets: offsets };
+  }
+
+  function nearestIndex(scrollElement, geometry) {
+    var viewCenter = scrollElement.scrollLeft + geometry.viewportWidth / 2;
+    var bestIndex = 0;
+    var bestDistance = Infinity;
+    geometry.offsets.forEach(function (offset, index) {
+      var distance = Math.abs(offset.center - viewCenter);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestIndex = index;
+      }
+    });
+    return bestIndex;
+  }
+
+  function attach(scrollElement) {
+    var root = scrollElement.closest(".coverflow-root");
+    var previousButton = root && root.querySelector(".coverflow-prev");
+    var nextButton = root && root.querySelector(".coverflow-next");
+    var items = getItems(scrollElement);
+    if (!items.length) return { rebuild: function () {} };
+
+    var geometry = cacheGeometry(scrollElement, items);
+    var frame = null;
+    var currentCenter = -1;
+    var wheelLockUntil = 0;
+    var dragging = false;
+    var dragMoved = false;
+    var pointerId = null;
+    var dragStartX = 0;
+    var dragStartScroll = 0;
+    var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function loadNearbyImages(index) {
+      geometry.offsets.forEach(function (offset, itemIndex) {
+        if (Math.abs(itemIndex - index) > 2) return;
+        offset.item.querySelectorAll("img[data-lazy-src]").forEach(function (image) {
+          image.src = image.dataset.lazySrc;
+          image.removeAttribute("data-lazy-src");
+        });
       });
     }
-    return {
-      viewportW: scrollEl.clientWidth,
-      offsets: offsets,
-    };
-  }
 
-  /* ---- transform math (pure computation, no DOM reads) ---- */
+    function updateCenter(index) {
+      if (index === currentCenter) return;
+      currentCenter = index;
+      loadNearbyImages(index);
+      geometry.offsets.forEach(function (offset, itemIndex) {
+        var isCenter = itemIndex === index;
+        var isNear = Math.abs(itemIndex - index) <= 2;
+        offset.item.classList.toggle("is-center", isCenter);
+        offset.item.classList.toggle("is-near", isNear);
+        if (isCenter) offset.item.setAttribute("aria-current", "true");
+        else offset.item.removeAttribute("aria-current");
+      });
+      if (previousButton) previousButton.disabled = index <= 0;
+      if (nextButton) nextButton.disabled = index >= items.length - 1;
+      window.__coverflowState = { centerIndex: index, itemCount: items.length };
+    }
 
-  function applyTransforms(scrollEl, geo) {
-    var viewCenter = scrollEl.scrollLeft + geo.viewportW / 2;
-    var closestIdx = 0;
-    var closestDist = Infinity;
-    var offsets = geo.offsets;
-    var EDGE = 0.35;
+    function applyTransforms() {
+      var viewCenter = scrollElement.scrollLeft + geometry.viewportWidth / 2;
+      var closestIndex = 0;
+      var closestDistance = Infinity;
+      var edge = 0.35;
 
-    for (var i = 0; i < offsets.length; i++) {
-      var o = offsets[i];
-      var delta = o.center - viewCenter;
-      var norm = clamp(delta / (o.width * 1.1), -1, 1);
-      var absN = Math.abs(norm);
-
-      var t = absN <= EDGE ? 1 - absN / EDGE : 0;
-      var s = t * t * (3 - 2 * t); // smoothstep
-
-      var rotateY = (1 - s) * (norm < 0 ? 15 : -15);
-      var scale   = 0.82 + s * 0.26;
-      var zDepth  = -60 + s * 140;
-      var shiftX  = -(1 - s) * norm * 60;
-      var opacity = 1;
-      // Ensure consistent stacking with overlap (no ties): nearer-to-center always on top
-      // Use pixel distance (delta) + index tiebreaker so right side never reverses.
-      var distPx = Math.abs(delta);
-      var zIndex = Math.round(100000 + s * 10000 - distPx * 10) - i;
-
-      // darkness: 0 at center, 0.5 on shelf (simulates light falloff)
-      var darkness = (1 - s) * 0.5;
-
-      if (o.surface) {
-        o.surface.style.transform =
-          "translate3d(" + (shiftX | 0) + "px,0," + (zDepth | 0) + "px)" +
+      geometry.offsets.forEach(function (offset, index) {
+        var delta = offset.center - viewCenter;
+        var normalized = clamp(delta / (offset.width * 1.1), -1, 1);
+        var absolute = Math.abs(normalized);
+        var linear = absolute <= edge ? 1 - absolute / edge : 0;
+        var smooth = linear * linear * (3 - 2 * linear);
+        var rotateY = (1 - smooth) * (normalized < 0 ? 15 : -15);
+        var scale = 0.82 + smooth * 0.26;
+        var depth = -60 + smooth * 140;
+        var shift = -(1 - smooth) * normalized * 60;
+        var darkness = (1 - smooth) * 0.5;
+        var pixelDistance = Math.abs(delta);
+        var zIndex = String(Math.round(100000 + smooth * 10000 - pixelDistance * 10) - index);
+        var transform =
+          "translate3d(" + Math.round(shift) + "px,0," + Math.round(depth) + "px)" +
           " rotateY(" + rotateY.toFixed(1) + "deg)" +
           " scale(" + scale.toFixed(3) + ")";
-      }
-      if (o.shadow) {
-        o.shadow.style.opacity = darkness.toFixed(2);
-      }
-      // z-index on the item wrapper (not surface)
-      offsets[i]._zIndex = zIndex;
+        var shadow = darkness.toFixed(2);
 
-      var dist = Math.abs(delta);
-      if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+        if (offset.surface && offset.lastTransform !== transform) {
+          offset.surface.style.transform = transform;
+          offset.lastTransform = transform;
+        }
+        if (offset.shadow && offset.lastShadow !== shadow) {
+          offset.shadow.style.opacity = shadow;
+          offset.lastShadow = shadow;
+        }
+        if (offset.lastZIndex !== zIndex) {
+          offset.item.style.zIndex = zIndex;
+          offset.lastZIndex = zIndex;
+        }
+
+        if (pixelDistance < closestDistance) {
+          closestDistance = pixelDistance;
+          closestIndex = index;
+        }
+      });
+
+      updateCenter(closestIndex);
     }
-
-    // Batch z-index + is-center writes
-    for (var j = 0; j < offsets.length; j++) {
-      var item = scrollEl.querySelectorAll("[data-coverflow-item='true']")[j];
-      if (!item) continue;
-      item.style.zIndex = offsets[j]._zIndex;
-      if (j === closestIdx) {
-        item.classList.add("is-center");
-      } else {
-        item.classList.remove("is-center");
-      }
-    }
-  }
-
-  /* ---- scroll-to helpers ---- */
-
-  function scrollToIdx(scrollEl, geo, idx, behavior) {
-    var o = geo.offsets[idx];
-    if (!o) return;
-    var target = o.center - geo.viewportW / 2;
-    var max = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
-    scrollEl.scrollTo({ left: clamp(target, 0, max), behavior: behavior || "smooth" });
-  }
-
-  function nearestIdx(scrollEl, geo) {
-    var vc = scrollEl.scrollLeft + geo.viewportW / 2;
-    var best = 0, bestD = Infinity;
-    for (var i = 0; i < geo.offsets.length; i++) {
-      var d = Math.abs(geo.offsets[i].center - vc);
-      if (d < bestD) { bestD = d; best = i; }
-    }
-    return best;
-  }
-
-  /* ---- attach ---- */
-
-  function attach(scrollEl) {
-    var items = getItems(scrollEl);
-    if (!items.length) return { schedule: function () {} };
-
-    var geo = cacheGeometry(scrollEl, items);
-    var rafId = null;
-    var wheelLockUntil = 0;
 
     function schedule() {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(function () {
-        rafId = null;
-        applyTransforms(scrollEl, geo);
+      if (frame !== null) return;
+      frame = requestAnimationFrame(function () {
+        frame = null;
+        applyTransforms();
       });
     }
 
-    function rebuildGeo() {
-      items = getItems(scrollEl);
-      geo = cacheGeometry(scrollEl, items);
+    function scrollToIndex(index, behavior) {
+      var offset = geometry.offsets[index];
+      if (!offset) return;
+      var maximum = Math.max(0, scrollElement.scrollWidth - scrollElement.clientWidth);
+      var target = clamp(offset.center - geometry.viewportWidth / 2, 0, maximum);
+      scrollElement.scrollTo({
+        left: target,
+        behavior: reducedMotion.matches ? "auto" : (behavior || "smooth"),
+      });
       schedule();
     }
 
-    /* wheel — snap to next/prev card */
+    function moveBy(amount) {
+      scrollToIndex(clamp(nearestIndex(scrollElement, geometry) + amount, 0, items.length - 1));
+    }
+
+    function rebuild() {
+      items = getItems(scrollElement);
+      geometry = cacheGeometry(scrollElement, items);
+      currentCenter = -1;
+      schedule();
+    }
+
     function onWheel(event) {
       if (event.ctrlKey) return;
-      var absY = Math.abs(event.deltaY);
-      var absX = Math.abs(event.deltaX);
-      var raw = absY >= absX ? event.deltaY : event.deltaX;
+      var horizontal = Math.abs(event.deltaX);
+      var vertical = Math.abs(event.deltaY);
+      var raw = vertical >= horizontal ? event.deltaY : event.deltaX;
       if (!raw) return;
 
-      var now = performance.now();
-      if (now < wheelLockUntil) { event.preventDefault(); return; }
+      var current = nearestIndex(scrollElement, geometry);
+      var direction = raw > 0 ? 1 : -1;
+      var next = clamp(current + direction, 0, items.length - 1);
+      if (next === current) return;
 
-      var dir = raw > 0 ? 1 : -1;
-      var cur = nearestIdx(scrollEl, geo);
-      var next = clamp(cur + dir, 0, items.length - 1);
       event.preventDefault();
-      scrollToIdx(scrollEl, geo, next, "smooth");
+      var now = performance.now();
+      if (now < wheelLockUntil) return;
+      scrollToIndex(next, "smooth");
       wheelLockUntil = now + 100;
-      schedule();
     }
 
-    /* drag / swipe */
-    var isDragging = false;
-    var dragStartX = 0;
-    var dragScrollStart = 0;
-
-    var dragHasMoved = false;
-    var DRAG_THRESHOLD = 5;
-
     function onPointerDown(event) {
-      if (event.button && event.button !== 0) return;
-      /* Allow normal clicks on interactive elements (buttons, links) */
-      var tgt = event.target;
-      if (tgt && tgt.closest && tgt.closest("a, button, [role='button'], input, textarea, select")) {
-        return;
-      }
-      isDragging = true;
-      dragHasMoved = false;
-      dragStartX = event.clientX != null ? event.clientX : event.touches[0].clientX;
-      dragScrollStart = scrollEl.scrollLeft;
-      scrollEl.style.cursor = "grabbing";
-      scrollEl.style.scrollSnapType = "none";
-      scrollEl.style.scrollBehavior = "auto";
-      event.preventDefault();
+      if (event.button !== 0) return;
+      if (event.target.closest("a, button, input, textarea, select")) return;
+      dragging = true;
+      dragMoved = false;
+      pointerId = event.pointerId;
+      dragStartX = event.clientX;
+      dragStartScroll = scrollElement.scrollLeft;
+      scrollElement.style.scrollSnapType = "none";
+      scrollElement.style.scrollBehavior = "auto";
+      if (scrollElement.setPointerCapture) scrollElement.setPointerCapture(pointerId);
     }
 
     function onPointerMove(event) {
-      if (!isDragging) return;
-      var x = event.clientX != null ? event.clientX : event.touches[0].clientX;
-      if (!dragHasMoved && Math.abs(x - dragStartX) < DRAG_THRESHOLD) return;
-      dragHasMoved = true;
+      if (!dragging || event.pointerId !== pointerId) return;
+      var distance = event.clientX - dragStartX;
+      if (!dragMoved && Math.abs(distance) < 5) return;
+      dragMoved = true;
       event.preventDefault();
-      scrollEl.scrollLeft = dragScrollStart + (dragStartX - x);
+      scrollElement.scrollLeft = dragStartScroll - distance;
       schedule();
     }
 
-    function onPointerUp() {
-      if (!isDragging) return;
-      isDragging = false;
-      scrollEl.style.cursor = "grab";
-      scrollEl.style.scrollSnapType = "x mandatory";
-      scrollEl.style.scrollBehavior = "";
-      scrollToIdx(scrollEl, geo, nearestIdx(scrollEl, geo), "smooth");
-      schedule();
+    function onPointerUp(event) {
+      if (!dragging || event.pointerId !== pointerId) return;
+      dragging = false;
+      if (scrollElement.releasePointerCapture && scrollElement.hasPointerCapture(pointerId)) {
+        scrollElement.releasePointerCapture(pointerId);
+      }
+      pointerId = null;
+      scrollElement.style.scrollSnapType = "x mandatory";
+      scrollElement.style.scrollBehavior = "";
+      if (dragMoved) scrollToIndex(nearestIndex(scrollElement, geometry), "smooth");
     }
 
-    scrollEl.addEventListener("mousedown", onPointerDown);
-    scrollEl.addEventListener("mousemove", onPointerMove);
-    window.addEventListener("mouseup", onPointerUp);
-    scrollEl.addEventListener("touchstart", onPointerDown, { passive: false });
-    scrollEl.addEventListener("touchmove", onPointerMove, { passive: false });
-    scrollEl.addEventListener("touchend", onPointerUp);
-    scrollEl.addEventListener("touchcancel", onPointerUp);
-    scrollEl.style.cursor = "grab";
+    function onKeyDown(event) {
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        moveBy(1);
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        moveBy(-1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        scrollToIndex(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        scrollToIndex(items.length - 1);
+      }
+    }
 
-    scrollEl.addEventListener("scroll", schedule, { passive: true });
-    scrollEl.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("resize", rebuildGeo);
+    scrollElement.addEventListener("scroll", schedule, { passive: true });
+    scrollElement.addEventListener("wheel", onWheel, { passive: false });
+    scrollElement.addEventListener("pointerdown", onPointerDown);
+    scrollElement.addEventListener("pointermove", onPointerMove);
+    scrollElement.addEventListener("pointerup", onPointerUp);
+    scrollElement.addEventListener("pointercancel", onPointerUp);
+    scrollElement.addEventListener("keydown", onKeyDown);
+    if (previousButton) previousButton.addEventListener("click", function () { moveBy(-1); });
+    if (nextButton) nextButton.addEventListener("click", function () { moveBy(1); });
 
-    // Initial: center first card, apply transforms
-    scrollToIdx(scrollEl, geo, 0, "instant");
-    applyTransforms(scrollEl, geo);
-    schedule();
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(rebuild).observe(scrollElement);
+    } else {
+      window.addEventListener("resize", rebuild, { passive: true });
+    }
 
-    return { schedule: schedule, rebuild: rebuildGeo };
+    scrollElement.querySelectorAll("img").forEach(function (image) {
+      if (!image.complete) image.addEventListener("load", rebuild, { once: true });
+    });
+
+    requestAnimationFrame(function () {
+      rebuild();
+      scrollToIndex(0, "auto");
+      applyTransforms();
+    });
+
+    return { rebuild: rebuild, schedule: schedule };
   }
 
-  /* ---- init / re-init ---- */
-
   var instances = new WeakMap();
+  var initFrame = null;
 
   function initAll() {
-    document.querySelectorAll(".coverflow-scroll").forEach(function (el) {
-      if (instances.has(el)) {
-        // Tab switched back — rebuild geometry (dimensions may have changed)
-        instances.get(el).rebuild();
-      } else {
-        instances.set(el, attach(el));
-      }
+    initFrame = null;
+    document.querySelectorAll(".coverflow-scroll").forEach(function (element) {
+      if (instances.has(element)) instances.get(element).rebuild();
+      else instances.set(element, attach(element));
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initAll);
-  } else {
-    initAll();
+  function scheduleInit() {
+    if (initFrame !== null) return;
+    initFrame = requestAnimationFrame(initAll);
   }
 
-  var observer = new MutationObserver(function () {
-    setTimeout(initAll, 60);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", scheduleInit);
+  else scheduleInit();
+
+  new MutationObserver(scheduleInit).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
   });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
 })();

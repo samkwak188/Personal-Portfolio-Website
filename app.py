@@ -6,6 +6,14 @@ from portfolio_app import build_layout, register_callbacks
 app = Dash(
     __name__,
     title="Changyong Kwak | Software Engineer",
+    update_title=None,
+    external_stylesheets=[
+        (
+            "https://fonts.googleapis.com/css2?"
+            "family=Instrument+Sans:wdth,wght@75..100,400..700&"
+            "family=Source+Sans+3:wght@400;500;600&display=swap"
+        )
+    ],
     meta_tags=[
         {
             "name": "description",
@@ -15,10 +23,11 @@ app = Dash(
             ),
         },
         {"name": "viewport", "content": "width=device-width, initial-scale=1"},
+        {"name": "theme-color", "content": "#0b0c0c"},
         {"property": "og:title", "content": "Changyong Kwak | Software Engineer"},
         {
             "property": "og:description",
-            "content": "Selected work across robotics controls, AI evaluation, and developer tools.",
+            "content": "Software, research, robotics, and product work by Changyong Kwak.",
         },
     ],
 )

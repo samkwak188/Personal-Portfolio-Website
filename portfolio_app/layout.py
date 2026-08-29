@@ -4,9 +4,10 @@ from datetime import datetime
 
 import dash_mantine_components as dmc
 from dash import html
+from dash_iconify import DashIconify
 
-from .cards import build_cards_grid, build_project_cards
-from .data import CODING_PROJECTS, CONTACT, EXPERIENCE, FEATURED_WORK, SKILLS
+from .cards import build_cards_grid, build_engineering_cards, build_project_cards
+from .data import ALL_PROJECTS, CONTACT, ENGINEERING_PROJECTS, EXPERIENCE, SKILL_GROUPS
 from .modals import get_engineering_modals
 from .theme import MANTINE_THEME
 
@@ -17,20 +18,12 @@ def _external_props(is_external=True):
     return {"target": "_blank", "rel": "noopener noreferrer"}
 
 
-def _text_link(label, href, *, external=True, class_name="text-link"):
-    return html.A(
-        [label, html.Span("↗" if external else "↓", className="link-arrow")],
-        href=href,
-        className=class_name,
-        **_external_props(external),
-    )
-
-
-def _section_heading(title, intro=None):
+def _section_heading(title, intro=None, *, inverse=False):
     children = [html.H2(title, className="section-title")]
     if intro:
         children.append(html.P(intro, className="section-intro"))
-    return html.Header(children, className="section-heading")
+    classes = "section-heading section-heading-inverse" if inverse else "section-heading"
+    return html.Header(children, className=classes)
 
 
 def _navigation():
@@ -38,14 +31,24 @@ def _navigation():
         html.Nav(
             [
                 html.A("Changyong Kwak", href="#top", className="brand"),
+                html.Button(
+                    "Menu",
+                    id="menu-toggle",
+                    className="menu-toggle",
+                    type="button",
+                    **{
+                        "aria-controls": "primary-navigation",
+                        "aria-expanded": "false",
+                    },
+                ),
                 html.Div(
                     [
-                        html.A("About", href="#about", className="nav-about"),
-                        html.A("Work", href="#work", className="nav-work"),
-                        html.A("Experience", href="#experience", className="nav-experience"),
-                        html.A("Projects", href="#projects", className="nav-projects"),
-                        html.A("Resume", href=CONTACT["resume"], target="_blank", className="nav-resume"),
+                        html.A("About", href="#about"),
+                        html.A("Projects", href="#projects"),
+                        html.A("Experience", href="#experience"),
+                        html.A("Contact", href="#contact"),
                     ],
+                    id="primary-navigation",
                     className="nav-links",
                 ),
             ],
@@ -59,133 +62,219 @@ def _navigation():
 def _hero():
     return html.Section(
         [
-            html.Div(
-                [
-                    html.H1(
-                        "I build dependable software for systems that have to work.",
-                        className="hero-title",
-                    ),
-                    html.P(
-                        "I'm Changyong Kwak, a computer science student at UW-Madison. "
-                        "I build control tools, test infrastructure, and developer systems "
-                        "across robotics and AI.",
-                        className="hero-copy",
-                    ),
-                    html.Div(
-                        [
-                            html.A("See selected work", href="#work", className="button button-primary"),
-                            html.A(
-                                "Download resume",
-                                href=CONTACT["resume"],
-                                target="_blank",
-                                className="button button-secondary",
-                            ),
-                        ],
-                        className="hero-actions",
-                    ),
-                    html.P(
-                        [
-                            html.Span(className="availability-dot"),
-                            "Seeking Winter and Summer 2027 software engineering internships.",
-                        ],
-                        className="availability",
-                    ),
-                ],
-                className="hero-content",
+            html.Canvas(
+                id="spatial-field",
+                className="spatial-field",
+                **{"aria-hidden": "true"},
             ),
-            html.Figure(
-                [
-                    html.Div(
-                        html.Img(
-                            src="/assets/profile.png",
-                            alt="Changyong Kwak at the Cursor Hackathon",
-                            className="hero-photo",
+            html.Div(
+                html.Div(
+                    [
+                        html.H1(
+                            [
+                                html.Span(
+                                    "I build dependable",
+                                    className="hero-title-line",
+                                ),
+                                html.Span(
+                                    "software for systems",
+                                    className="hero-title-line",
+                                ),
+                                html.Span(
+                                    "that have to work.",
+                                    className="hero-title-line",
+                                ),
+                            ],
+                            className="hero-title",
                         ),
-                        className="hero-photo-frame",
-                    ),
-                    html.Figcaption(
-                        [
-                            html.Span("Madison, Wisconsin"),
-                            html.Span("Cursor Hackathon, 2026"),
-                        ]
-                    ),
-                ],
-                className="hero-figure",
+                        html.P(
+                            "Software engineer working across robotics, developer "
+                            "infrastructure, and reliable intelligent systems.",
+                            className="hero-copy",
+                        ),
+                        html.Div(
+                            [
+                                html.A(
+                                    "Explore projects",
+                                    href="#projects",
+                                    className="hero-link",
+                                ),
+                                html.A("Contact", href="#contact", className="hero-link"),
+                            ],
+                            className="hero-actions",
+                        ),
+                        html.P(
+                            "Seeking Winter and Summer 2027 software engineering internships.",
+                            className="availability",
+                        ),
+                    ],
+                    className="hero-content",
+                ),
+                className="hero-inner section-shell",
             ),
         ],
         id="top",
-        className="hero section-shell",
+        className="hero",
     )
 
 
-def _flow_diagram(nodes):
-    children = []
-    for index, node in enumerate(nodes):
-        children.append(html.Div(node, className="flow-node"))
-        if index < len(nodes) - 1:
-            children.append(html.Div("→", className="flow-arrow", **{"aria-hidden": "true"}))
-    return html.Div(
-        children,
-        className="flow-diagram",
-        **{"aria-label": "System flow: " + " to ".join(nodes)},
-    )
-
-
-def _featured_work_item(project):
-    return html.Article(
-        [
+def _about_section():
+    return html.Section(
+        html.Div(
             html.Div(
                 [
-                    html.H3(project["title"]),
-                    html.P(project["context"], className="work-context"),
-                    html.P(project["summary"], className="work-summary"),
-                    _text_link(
-                        project["link_label"],
-                        project["link"],
-                        external=project["external"],
+                    html.Div(
+                        [
+                            html.H2("About", className="about-title"),
+                            html.P(
+                                "I am Changyong Kwak, a computer science student at "
+                                "UW-Madison and a software engineer working across product "
+                                "interfaces, backend systems, robotics, and applied machine "
+                                "learning. I care most about software whose behavior can be "
+                                "explained, tested, and trusted - from browser-to-robot control "
+                                "and evaluation infrastructure to security tools and focused "
+                                "products built under real constraints.",
+                                className="about-intro",
+                            ),
+                        ],
+                        className="about-copy",
+                    ),
+                    html.Figure(
+                        html.Img(
+                            src="/assets/profile.png",
+                            alt=(
+                                "Changyong Kwak beside the Cursor banner at the "
+                                "Cursor Hackathon"
+                            ),
+                            className="about-photo",
+                        ),
+                        className="about-figure",
                     ),
                 ],
-                className="work-copy",
+                className="about-layout",
             ),
-            html.Div(
-                [
-                    _flow_diagram(project["flow"]),
-                    html.P("Failure-aware from input to result", className="diagram-caption"),
-                ],
-                className="work-diagram",
+            className="section-shell",
+        ),
+        id="about",
+        className="about-section",
+    )
+
+
+def _skill_tab(group, index):
+    selected = index == 0
+    return html.Button(
+        [
+            DashIconify(icon=group["icon"], width=24, height=24),
+            html.Span(group["label"]),
+        ],
+        id=f"skill-tab-{group['id']}",
+        type="button",
+        className="skill-tab is-active" if selected else "skill-tab",
+        **{
+            "data-skill-control": group["id"],
+            "role": "tab",
+            "aria-selected": "true" if selected else "false",
+            "aria-controls": f"skill-panel-{group['id']}",
+            "tabIndex": 0 if selected else -1,
+        },
+    )
+
+
+def _skill_panel(group, index):
+    return html.Div(
+        [
+            html.P(group["description"], className="skill-panel-copy"),
+            html.Ul(
+                [html.Li(item) for item in group["items"]],
+                className="skill-tool-list",
             ),
         ],
-        className="featured-work-item",
+        id=f"skill-panel-{group['id']}",
+        className="skill-panel is-active" if index == 0 else "skill-panel",
+        **{
+            "data-skill-panel": group["id"],
+            "role": "tabpanel",
+            "aria-labelledby": f"skill-tab-{group['id']}",
+            "aria-hidden": "false" if index == 0 else "true",
+        },
+    )
+
+
+def _skills_section():
+    return html.Section(
+        html.Div(
+            [
+                _section_heading(
+                    "Tools and systems",
+                    "Select a discipline to see the technologies I use and how I approach the work.",
+                    inverse=True,
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                _skill_tab(group, index)
+                                for index, group in enumerate(SKILL_GROUPS)
+                            ],
+                            className="skill-tabs",
+                            **{"role": "tablist", "aria-label": "Technical disciplines"},
+                        ),
+                        html.Div(
+                            [
+                                _skill_panel(group, index)
+                                for index, group in enumerate(SKILL_GROUPS)
+                            ],
+                            className="skill-stage",
+                            **{"data-skill-stage": "true"},
+                        ),
+                    ],
+                    className="skills-instrument",
+                    **{"data-skills-instrument": "true"},
+                ),
+            ],
+            className="section-shell",
+        ),
+        className="skills-section",
     )
 
 
 def _work_section():
+    archive_cards = [
+        *build_project_cards(ALL_PROJECTS),
+        *build_engineering_cards(ENGINEERING_PROJECTS),
+    ]
     return html.Section(
         [
-            _section_heading(
-                "Selected work",
-                "A few systems I can explain from the API down to the failure cases.",
+            html.Div(
+                _section_heading(
+                    "Projects",
+                    "The complete archive: product software, research systems, robotics, and physical prototypes.",
+                ),
+                className="projects-heading section-shell",
             ),
-            html.Div([_featured_work_item(project) for project in FEATURED_WORK]),
+            html.Div(
+                build_cards_grid(archive_cards),
+                id="projects-grid",
+                className="archive-grid",
+            ),
         ],
-        id="work",
-        className="content-section section-shell",
+        id="projects",
+        className="projects-section",
     )
 
 
 def _experience_item(item):
     return html.Article(
         [
-            html.Div(className="timeline-marker"),
             html.Div(
                 [
                     html.H3(item["company"]),
                     html.P(item["role"], className="experience-role"),
-                    html.P(item["description"], className="experience-description"),
                 ],
-                className="experience-main",
+                className="experience-title-block",
             ),
             html.Time(item["dates"], className="experience-dates"),
+            html.P(item["description"], className="experience-description"),
         ],
         className="experience-item",
     )
@@ -193,87 +282,34 @@ def _experience_item(item):
 
 def _experience_section():
     return html.Section(
-        [
-            _section_heading("Experience"),
-            html.Div([_experience_item(item) for item in EXPERIENCE], className="timeline"),
-        ],
-        id="experience",
-        className="content-section section-shell",
-    )
-
-
-def _project_archive_section():
-    initial_grid = build_cards_grid(build_project_cards(CODING_PROJECTS))
-    return html.Section(
-        [
-            _section_heading(
-                "Project archive",
-                "Software, robotics, and hardware projects from the last several years.",
-            ),
-            html.Div(
-                dmc.SegmentedControl(
-                    id="project-category-toggle",
-                    value="coding",
-                    data=[
-                        {"label": "Software and AI", "value": "coding"},
-                        {"label": "Robotics and hardware", "value": "engineering"},
-                    ],
-                    className="archive-toggle",
-                    size="md",
+        html.Div(
+            [
+                _section_heading(
+                    "Experience",
+                    "Engineering work where reliability, evidence, and clear failure behavior matter.",
+                    inverse=True,
                 ),
-                className="archive-controls",
-            ),
-            html.Div(initial_grid, id="projects-grid", className="archive-grid"),
-        ],
-        id="projects",
-        className="content-section project-archive-section",
+                html.Div(
+                    [_experience_item(item) for item in EXPERIENCE],
+                    className="experience-list",
+                ),
+            ],
+            className="section-shell",
+        ),
+        id="experience",
+        className="experience-section",
     )
 
 
-def _skill_column(title, skills):
-    return html.Div(
-        [html.H3(title), html.P("\n".join(skills), className="skill-list")],
-        className="skill-column",
-    )
-
-
-def _about_section():
-    return html.Section(
+def _contact_link(label, href, icon, *, external=True):
+    return html.A(
         [
-            _section_heading("About"),
-            html.Div(
-                [
-                    html.P(
-                        "I like the parts of software where good behavior depends on careful "
-                        "boundaries: a canceled robot command, an interrupted evaluation run, "
-                        "or a tool that must fail safely.",
-                        className="about-statement",
-                    ),
-                    html.Div(
-                        [
-                            html.P(
-                                "At UW-Madison, I study computer science and work across robotics, "
-                                "AI systems, and full-stack software. I enjoy tracing a problem "
-                                "through the whole stack, then writing the tests that make the fix stick."
-                            ),
-                            html.P(
-                                "I expect to graduate in December 2027. Outside class, I am usually "
-                                "building a project, reading through an unfamiliar codebase, or helping "
-                                "a teammate turn a rough demo into something reliable."
-                            ),
-                        ],
-                        className="about-copy",
-                    ),
-                ],
-                className="about-grid",
-            ),
-            html.Div(
-                [_skill_column(title, skills) for title, skills in SKILLS.items()],
-                className="skills-grid",
-            ),
+            DashIconify(icon=icon, width=28, height=28),
+            html.Span(label),
         ],
-        id="about",
-        className="content-section section-shell",
+        href=href,
+        className="contact-link",
+        **_external_props(external),
     )
 
 
@@ -281,30 +317,64 @@ def _contact_section():
     return html.Section(
         html.Div(
             [
-                html.P("Have a role where this kind of work matters? I'd be glad to talk."),
                 html.Div(
                     [
-                        _text_link("Email", CONTACT["email"], external=False),
-                        _text_link("LinkedIn", CONTACT["linkedin"]),
-                        _text_link("GitHub", CONTACT["github"]),
-                        _text_link("Resume", CONTACT["resume"]),
+                        html.H2("Contact", className="contact-title"),
+                        html.P(
+                            "If you are building software where the details matter, "
+                            "I would be glad to hear about it.",
+                            className="contact-copy",
+                        ),
+                    ],
+                    className="contact-heading",
+                ),
+                html.Div(
+                    [
+                        _contact_link(
+                            "LinkedIn",
+                            CONTACT["linkedin"],
+                            "simple-icons:linkedin",
+                        ),
+                        _contact_link(
+                            "GitHub",
+                            CONTACT["github"],
+                            "simple-icons:github",
+                        ),
+                        _contact_link(
+                            "Email",
+                            CONTACT["email"],
+                            "ph:envelope-simple",
+                            external=False,
+                        ),
+                        _contact_link(
+                            "Resume",
+                            CONTACT["resume"],
+                            "ph:file-text",
+                        ),
                     ],
                     className="contact-links",
+                    **{"aria-label": "Contact links"},
                 ),
             ],
-            className="contact-block",
+            className="contact-inner section-shell",
         ),
-        className="contact-section section-shell",
+        id="contact",
+        className="contact-section",
     )
 
 
 def _footer():
     return html.Footer(
-        [
-            html.P(f"Changyong Kwak · Madison, Wisconsin · {datetime.now().year}"),
-            html.A("Back to top ↑", href="#top"),
-        ],
-        className="site-footer section-shell",
+        html.Div(
+            [
+                html.P(
+                    f"Changyong Kwak · Madison, Wisconsin · {datetime.now().year}"
+                ),
+                html.A("Back to top", href="#top"),
+            ],
+            className="footer-inner section-shell",
+        ),
+        className="site-footer",
     )
 
 
@@ -322,11 +392,12 @@ def build_layout():
                 [
                     _hero(),
                     _about_section(),
+                    _skills_section(),
                     _work_section(),
                     _experience_section(),
-                    _project_archive_section(),
                     _contact_section(),
-                ]
+                ],
+                id="main-content",
             ),
             _footer(),
         ],

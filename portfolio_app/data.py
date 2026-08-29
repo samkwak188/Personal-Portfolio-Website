@@ -1,5 +1,94 @@
 """Static data used to render the portfolio content."""
 
+RECENT_PROJECTS = [
+    {
+        "title": "Ekua",
+        "image_src": "/assets/ekua-outreach.png",
+        "image_alt": "Ekua Outreach dashboard showing active company outreach sessions",
+        "image_position": "center top",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/22joshlee/ekua-outreach",
+        "context": "Agentic outreach system",
+        "stack": ["Python", "FastAPI", "Supabase"],
+        "description": (
+            "A human-in-the-loop outreach system that researches companies, drafts grounded "
+            "messages, manages replies, and schedules calls with operator approval before every send."
+        ),
+    },
+    {
+        "title": "EdgeHarness",
+        "image_src": "/assets/edgeharness.svg",
+        "image_alt": "EdgeHarness routed local model evaluation pipeline",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/SAIL-Project---EdgeHarness",
+        "context": "UW-Madison SAIL research",
+        "stack": ["Python", "FastAPI", "React"],
+        "image_fit": "contain",
+        "description": (
+            "A local model orchestration harness with routing, tool execution, verifier gates, "
+            "and cost and latency telemetry for repeatable model comparisons."
+        ),
+    },
+    {
+        "title": "Temporal Roadside Calibration",
+        "image_src": "/assets/temporal-calibration.webp",
+        "image_alt": "Roadside intersection frame with homography calibration overlay",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/CATS-Lab----temporal-roadside-calibration",
+        "context": "CATS Lab research",
+        "stack": ["Python", "OpenCV", "Reproducible research"],
+        "description": (
+            "A reproducible pipeline for measuring fixed-camera drift and its effect on "
+            "world-coordinate vehicle tracks, speed estimates, and behavior analysis."
+        ),
+    },
+    {
+        "title": "SwipeLease",
+        "image_src": "/assets/swipelease.webp",
+        "image_alt": "SwipeLease mobile sublease discovery interface",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/SwipeLease",
+        "context": "Campus housing product",
+        "stack": ["Expo", "FastAPI", "Supabase"],
+        "description": (
+            "A campus sublease matching product with swipe discovery, verified student "
+            "accounts, likes, matches, and in-app chat."
+        ),
+    },
+    {
+        "title": "Clawmsy",
+        "image_src": "/assets/clawmsy.jpg",
+        "image_alt": "Clawmsy desktop assistant repository and project documentation",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/Clawmsy---AI-Agent-for-Students",
+        "context": "Desktop software",
+        "stack": ["Electron", "React", "TypeScript"],
+        "description": (
+            "A screen-aware desktop study assistant with live visual context, multimodal chat, "
+            "provider switching, screenshot analysis, and capture-safety controls."
+        ),
+    },
+    {
+        "title": "LiveClaw",
+        "image_src": "/assets/liveclaw.png",
+        "image_alt": "LiveClaw desktop control application mark",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/samkwak188/LiveClaw",
+        "context": "Desktop automation",
+        "stack": ["Rust", "Python", "Tauri"],
+        "description": (
+            "A voice-controlled desktop agent with visual grounding, step verification, "
+            "interrupt handling, input-conflict detection, and confirmation for risky actions."
+        ),
+    },
+]
+
 CODING_PROJECTS = [
     {
         "title": "Husk",
@@ -10,6 +99,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/Husk-Agentic-dependency-security-CLI",
         "accent": "#f0efe9",
+        "context": "Dependency security",
+        "stack": ["Python", "npm", "PyPI"],
         "description": (
             "An install-time npm and PyPI security gate that reached 97.3% precision and "
             "82.8% F1 on a 100-package benchmark. It won Best Technical Depth in 2026."
@@ -24,6 +115,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/facebook/winterfell/pull/407",
         "accent": "#f0efe9",
+        "context": "Open-source contribution",
+        "stack": ["Rust", "Winterfell", "ZK proofs"],
         "description": (
             "A Rust contribution that rejects mismatched AIR LDE and FRI domain sizes before "
             "proof validation, with a typed error for the invalid state."
@@ -38,6 +131,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/Tableus-ai-agent",
         "accent": "#1f3a5f",
+        "context": "Cursor Hackathon",
+        "stack": ["Next.js", "FastAPI", "Google Maps"],
         "description": (
             "A group dining app that ranks nearby restaurants from preferences, reviews, "
             "dietary needs, and live Google Maps data. It won 2nd place at Cursor Hackathon 2026."
@@ -52,6 +147,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/AI-Hub-v2",
         "accent": "#24324d",
+        "context": "Browser tooling",
+        "stack": ["Chrome Extensions", "Streaming", "Model routing"],
         "description": (
             "A Chrome side panel that sends a question and the current page context to four "
             "models, then streams their responses into one final answer."
@@ -66,6 +163,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/Polymarket-Automation",
         "accent": "#1f2b45",
+        "context": "Market research automation",
+        "stack": ["Python", "Risk controls", "Telemetry"],
         "description": (
             "A Polymarket research bot that combines news classification, probability estimates, "
             "Kelly sizing, risk limits, and live run telemetry."
@@ -80,6 +179,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/MediMenu",
         "accent": "#3b2f47",
+        "context": "Dietary safety product",
+        "stack": ["Full stack", "QR workflows", "Structured data"],
         "description": (
             "A menu tool that flags possible conflicts with allergies, medications, and dietary "
             "restrictions. Restaurants can digitize a menu and share the result by QR code."
@@ -94,6 +195,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/TrustRent---Madhacks2025",
         "accent": "#1a3a4a",
+        "context": "Inspection workflow",
+        "stack": ["Full stack", "Image evidence", "Records"],
         "description": (
             "A rental inspection workflow for collecting verified photos, storing structured "
             "records, and reviewing inspections across a property portfolio."
@@ -108,6 +211,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/ClearMove-Final----Madhacks2025",
         "accent": "#1a3f6f",
+        "context": "Badger Build",
+        "stack": ["Full stack", "Evidence capture", "Cloud"],
         "description": (
             "A rental inspection app that creates timestamped move-in and move-out evidence "
             "packets. It won 3rd place out of 92 teams at Badger Build 2025."
@@ -122,6 +227,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/MadLuv---MadData-Hackathon-2025-Project",
         "accent": "#5c1a3a",
+        "context": "MadData Hackathon",
+        "stack": ["Recommendations", "University auth", "Data"],
         "description": (
             "A student matchmaking app with verified university sign-in and a recommendation "
             "pipeline built from profile and preference data."
@@ -136,6 +243,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/Wisconsin-Autonomous-Perception-Coding-Challenge",
         "accent": "#2a3a1a",
+        "context": "Computer vision",
+        "stack": ["Python", "OpenCV", "RANSAC"],
         "description": (
             "A lane perception exercise using HSV segmentation, geometric filters, and RANSAC "
             "to recover a usable road boundary from a sample driving image."
@@ -150,6 +259,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/Image-Crawler-with-Face-detection",
         "accent": "#1a2a4a",
+        "context": "Vision data tooling",
+        "stack": ["Python", "Web crawling", "Face detection"],
         "description": (
             "A crawler that collects images and filters them with face detection, reducing the "
             "manual cleanup needed before building a small vision dataset."
@@ -164,6 +275,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/AI-Face-Type-Analyzer",
         "accent": "#3a1a5a",
+        "context": "Browser machine learning",
+        "stack": ["TensorFlow.js", "Responsive web", "Vision"],
         "description": (
             "A web app that runs a small image classifier and returns a simple face-shape result "
             "through a responsive browser interface."
@@ -178,6 +291,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/Fake-Text-Story-Video-Generator---Complete-Version",
         "accent": "#1a3050",
+        "context": "Media automation",
+        "stack": ["Cloud Run", "FFmpeg", "Rendering"],
         "description": (
             "A cloud service that turns a text conversation into a captioned short video, "
             "including layout, timing, and server-side rendering."
@@ -192,6 +307,8 @@ CODING_PROJECTS = [
         "live_url": None,
         "github_url": "https://github.com/samkwak188/GoViral-Wizard---youtube-shorts-tiktok-video-creator",
         "accent": "#6a2a1a",
+        "context": "GoViral",
+        "stack": ["FFmpeg", "Voice", "Publishing"],
         "description": (
             "A short-video workflow that combines voiceover, captions, background media, FFmpeg "
             "rendering, and publishing in one tool."
@@ -206,6 +323,8 @@ CODING_PROJECTS = [
         "demo_url": None,
         "github_url": "https://github.com/samkwak188/EPL-Match-Result-Predictor",
         "accent": "#1a1a3a",
+        "context": "Predictive analytics",
+        "stack": ["Python", "Machine learning", "Dash"],
         "description": (
             "A match prediction app that cleans football data, runs a trained model, and presents "
             "English Premier League forecasts in a browser dashboard."
@@ -220,6 +339,8 @@ ENGINEERING_PROJECTS = [
         "image_src": "/assets/kitchen.png",
         "image_alt": "Environmental Engineering Prototype",
         "accent": "#2a3a2a",
+        "context": "Mechanical prototype",
+        "stack": ["Filtration", "Fabrication", "Testing"],
         "description": (
             "A working multi-stage purifier that separates oil and food particles from kitchen "
             "wastewater using mechanical filtration and absorbent media."
@@ -231,6 +352,8 @@ ENGINEERING_PROJECTS = [
         "image_src": "/assets/4dhelmet.png",
         "image_alt": "Embedded Systems Project",
         "accent": "#3a2a1a",
+        "context": "World Robot Olympiad",
+        "stack": ["Embedded control", "CAD", "Fabrication"],
         "description": (
             "A home cinema helmet that synchronizes motion, mist, light, and scent with video. "
             "The project won first place at World Robot Olympiad Korea."
@@ -242,12 +365,16 @@ ENGINEERING_PROJECTS = [
         "image_src": "/assets/humanoids.png",
         "image_alt": "Robotics Control System",
         "accent": "#1a2a3a",
+        "context": "Robotics control",
+        "stack": ["C", "Servo control", "3D printing"],
         "description": (
             "A set of small humanoid robots programmed in C to perform synchronized movement. "
             "I tuned servo sequences and fabricated replacement parts with a 3D printer."
         ),
     },
 ]
+
+ALL_PROJECTS = RECENT_PROJECTS + CODING_PROJECTS
 
 IMPACT_METRICS = [
     {"label": "Years Building", "value": "3+"},
@@ -423,17 +550,55 @@ EXPERIENCE = [
     },
 ]
 
-SKILLS = {
-    "Languages": ["Python", "TypeScript", "Rust", "Java", "C / C++", "SQL", "Go"],
-    "Systems and tools": [
-        "FastAPI",
-        "React / Next.js",
-        "ROS 2",
-        "PostgreSQL",
-        "Docker",
-        "Kubernetes",
-        "GitHub Actions",
-        "Linux",
-        "PyTorch",
-    ],
-}
+SKILL_GROUPS = [
+    {
+        "id": "systems",
+        "label": "Systems",
+        "icon": "ph:terminal-window",
+        "description": (
+            "I design boundaries, cancellation paths, evidence, and failure behavior before "
+            "optimizing the happy path."
+        ),
+        "items": ["Python", "Rust", "C / C++", "FastAPI", "Linux", "PostgreSQL"],
+    },
+    {
+        "id": "product",
+        "label": "Product",
+        "icon": "ph:browser",
+        "description": (
+            "I carry product work from interaction design through APIs, persistence, and "
+            "deployment, with the interface kept close to real system state."
+        ),
+        "items": ["TypeScript", "React", "Next.js", "Expo", "Supabase", "Dash"],
+    },
+    {
+        "id": "robotics",
+        "label": "Robotics",
+        "icon": "ph:robot",
+        "description": (
+            "I connect browser controls to simulated or physical machines with explicit "
+            "timeouts, interruption, and repeatable integration checks."
+        ),
+        "items": ["ROS 2", "Isaac Sim", "OpenCV", "Servo control", "Fusion 360", "3D printing"],
+    },
+    {
+        "id": "intelligence",
+        "label": "ML and data",
+        "icon": "ph:graph",
+        "description": (
+            "I treat models as measurable system components: grounded inputs, honest claims, "
+            "strict evaluation, and traceable outputs."
+        ),
+        "items": ["PyTorch", "scikit-learn", "Pandas", "NumPy", "Computer vision", "Evaluation"],
+    },
+    {
+        "id": "delivery",
+        "label": "Delivery",
+        "icon": "ph:cloud-check",
+        "description": (
+            "I make builds reproducible and observable across local development, CI, cloud "
+            "services, and production recovery paths."
+        ),
+        "items": ["Docker", "GitHub Actions", "GCP", "Vercel", "Render", "Cypress"],
+    },
+]
