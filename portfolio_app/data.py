@@ -2,7 +2,22 @@
 
 RECENT_PROJECTS = [
     {
-        "title": "Ekua",
+        "title": "EdgeHarness",
+        "image_src": "/assets/edgeharness.svg",
+        "image_alt": "EdgeHarness routed local model evaluation pipeline",
+        "live_url": None,
+        "demo_url": None,
+        "github_url": "https://github.com/EdgeHarness",
+        "context": "Open-source agent infrastructure",
+        "stack": ["Python", "Llama 3.1", "llama.cpp"],
+        "image_fit": "contain",
+        "description": (
+            "An open-source harness and evaluation workspace for reliable, auditable tool-using "
+            "business agents, with a locally tuned Llama 3.1 8B office-agent runtime."
+        ),
+    },
+    {
+        "title": "Ekua autonomous agent outreach platform",
         "image_src": "/assets/ekua-outreach.png",
         "image_alt": "Ekua Outreach dashboard showing active company outreach sessions",
         "image_position": "center top",
@@ -14,21 +29,6 @@ RECENT_PROJECTS = [
         "description": (
             "A human-in-the-loop outreach system that researches companies, drafts grounded "
             "messages, manages replies, and schedules calls with operator approval before every send."
-        ),
-    },
-    {
-        "title": "EdgeHarness",
-        "image_src": "/assets/edgeharness.svg",
-        "image_alt": "EdgeHarness routed local model evaluation pipeline",
-        "live_url": None,
-        "demo_url": None,
-        "github_url": "https://github.com/samkwak188/SAIL-Project---EdgeHarness",
-        "context": "UW-Madison SAIL research",
-        "stack": ["Python", "FastAPI", "React"],
-        "image_fit": "contain",
-        "description": (
-            "A local model orchestration harness with routing, tool execution, verifier gates, "
-            "and cost and latency telemetry for repeatable model comparisons."
         ),
     },
     {
