@@ -138,7 +138,7 @@
           "}",
           "void main() {",
           "  float eased = u_disassembly * u_disassembly * (3.0 - 2.0 * u_disassembly);",
-          "  vec3 localPosition = a_position + a_explode * eased;",
+          "  vec3 localPosition = a_position + a_explode * eased * 0.72;",
           "  vec2 orbit = u_rotation + vec2(-u_pointer.y * 0.075, u_pointer.x * 0.12);",
           "  vec3 assembled = rotateY(rotateX(localPosition, orbit.x), orbit.y);",
           "  vec3 objectNormal = rotateY(rotateX(a_normal, orbit.x), orbit.y);",

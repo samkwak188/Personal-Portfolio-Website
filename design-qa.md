@@ -159,7 +159,8 @@ This revision supersedes the scroll-driven disassembly behavior recorded in the 
 
 - Copy and composition: the headline, supporting copy, navigation, links, hero curve, field geometry, assembled model scale, and About transition are unchanged. Above-the-fold copy diff: zero.
 - Trigger behavior: scrolling from the top to 340 px leaves disassembly exactly at `0`. A GPU-confirmed hit on the assembled mesh changes the target from `0` to `1`; leaving the expanded model envelope returns it to `0`.
-- Part behavior: all 35 mechanical primitives carry stable GPU part IDs. The automated pass resolved part 22 and adjacent part 24 at distinct pointer positions; each reached an independent highlight intensity of `1.0` while the assembly remained open.
+- Separation density: the final exploded displacement is 72% of the initial hover-disassembly pass. Layer and fin gaps remain visually distinct and independently targetable, while the silhouette stays compact on the right side of the hero.
+- Part behavior: all 35 mechanical primitives carry stable GPU part IDs. The final automated pass resolved part 22 and adjacent part 23 at distinct pointer positions; each reached an independent highlight intensity of `1.0` while the assembly remained open.
 - Highlight treatment: only the frontmost visible picked primitive receives the animated cobalt-white scan and specular lift. Empty space clears the part highlight without prematurely collapsing the model.
 - Direct manipulation: click-drag remains available after engagement. The verified drag changed rotation from `[0, 0]` to approximately `[0.104, 0.303]`, used the `grabbing` cursor while active, and kept disassembly at `1`.
 - Responsive and accessibility behavior: the mechanical mesh remains disabled below 700 px. Reduced-motion uses event-driven static frames, snaps hover disassembly/highlight on and off, and does not run a continuous animation loop.
