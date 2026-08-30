@@ -181,7 +181,7 @@ body.menu-open .site-header {
 
 @media (pointer: fine) and (min-width: 700px) {
     .spatial-field {
-        cursor: grab;
+        cursor: default;
         touch-action: pan-y;
     }
 
@@ -191,6 +191,10 @@ body.menu-open .site-header {
 
     .hero-content {
         pointer-events: auto;
+    }
+
+    .hero.is-core-hovered .spatial-field {
+        cursor: grab;
     }
 
     .hero.is-core-interacting .spatial-field {

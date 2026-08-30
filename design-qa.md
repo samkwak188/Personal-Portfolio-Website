@@ -140,3 +140,36 @@ final result: passed
 - No material mismatch remains. The only intentional visual change from the accepted hero is the user-requested shinier surface and richer direct manipulation.
 
 final result: passed
+
+## Hover-disassembly and per-part picking revision
+
+This revision supersedes the scroll-driven disassembly behavior recorded in the preceding shader review.
+
+### Evidence
+
+- Accepted assembled hero: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\shiny-core-idle.png`
+- Final assembled state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-initial.png`
+- First independently highlighted part: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-first-highlight.png`
+- Second independently highlighted part: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-second-highlight.png`
+- Final collapsed state after pointer exit: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-collapsed.png`
+- Final mobile state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-mobile.png`
+- Browser fallback: Playwright drove installed Chrome because no Browser/IAB tool was available. Desktop used 1487 x 1058 CSS pixels; mobile used 390 x 844 CSS pixels.
+
+### Fidelity ledger
+
+- Copy and composition: the headline, supporting copy, navigation, links, hero curve, field geometry, assembled model scale, and About transition are unchanged. Above-the-fold copy diff: zero.
+- Trigger behavior: scrolling from the top to 340 px leaves disassembly exactly at `0`. A GPU-confirmed hit on the assembled mesh changes the target from `0` to `1`; leaving the expanded model envelope returns it to `0`.
+- Part behavior: all 35 mechanical primitives carry stable GPU part IDs. The automated pass resolved part 22 and adjacent part 24 at distinct pointer positions; each reached an independent highlight intensity of `1.0` while the assembly remained open.
+- Highlight treatment: only the frontmost visible picked primitive receives the animated cobalt-white scan and specular lift. Empty space clears the part highlight without prematurely collapsing the model.
+- Direct manipulation: click-drag remains available after engagement. The verified drag changed rotation from `[0, 0]` to approximately `[0.104, 0.303]`, used the `grabbing` cursor while active, and kept disassembly at `1`.
+- Responsive and accessibility behavior: the mechanical mesh remains disabled below 700 px. Reduced-motion uses event-driven static frames, snaps hover disassembly/highlight on and off, and does not run a continuous animation loop.
+- Rendering: the visible scene remains two continuous GPU draw calls with static geometry buffers. Frontmost-part resolution uses a scissored one-pixel WebGL ID pass only while the pointer or exploded geometry changes; it does not perform a CPU raycast.
+
+### Verification
+
+- Desktop, mobile, and reduced-motion requests returned HTTP 200. WebGL `getError()` returned `0` in assembled, exploded, highlighted, dragged, collapsed, mobile, and reduced-motion states.
+- The picking framebuffer reported complete. No WebGL initialization error, page error, console warning, console error, title overflow, or document overflow was observed.
+- Scroll-only pick passes remained at `0`. Picking stopped once the pointer and highlight state settled, confirming that the auxiliary pass is interaction-driven rather than continuously rendered.
+- Visual comparison found no P0/P1/P2 regression in headline width, navigation, hero alignment, About transition, or mobile layout. The only intentional visual change is the requested hover-driven exploded view and independently animated part highlight.
+
+final result: passed

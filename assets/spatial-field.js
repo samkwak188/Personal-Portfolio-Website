@@ -1,5 +1,5 @@
 /* GPU-rendered signal field and exploded mechanical compute core.
-   Static geometry lives in GPU buffers; pointer and scroll motion are shader uniforms. */
+   Static geometry lives in GPU buffers; interaction, picking, and material motion stay on the GPU. */
 (function () {
   "use strict";
 
@@ -54,8 +54,28 @@
       return program;
     }
 
+    function createProgramWithSharedVertex(sourceProgram, fragmentSource) {
+      var attached = gl.getAttachedShaders(sourceProgram) || [];
+      var vertexShader = attached.filter(function (shader) {
+        return gl.getShaderParameter(shader, gl.SHADER_TYPE) === gl.VERTEX_SHADER;
+      })[0];
+      if (!vertexShader) throw new Error("Unable to reuse mechanical vertex shader");
+
+      var program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragmentSource));
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        var message = gl.getProgramInfoLog(program);
+        gl.deleteProgram(program);
+        throw new Error(message || "Unable to link WebGL picking program");
+      }
+      return program;
+    }
+
     var lineProgram;
     var coreProgram;
+    var pickProgram;
     try {
       lineProgram = createProgram(
         [
@@ -91,6 +111,7 @@
           "attribute vec3 a_normal;",
           "attribute vec3 a_explode;",
           "attribute float a_material;",
+          "attribute float a_part;",
           "uniform float u_aspect;",
           "uniform float u_time;",
           "uniform float u_disassembly;",
@@ -104,6 +125,7 @@
           "varying vec3 v_view_direction;",
           "varying float v_depth;",
           "varying float v_material;",
+          "varying float v_part;",
           "vec3 rotateX(vec3 point, float angle) {",
           "  float sine = sin(angle);",
           "  float cosine = cos(angle);",
@@ -153,6 +175,7 @@
           "  v_view_direction = normalize(cameraPosition - assembled);",
           "  v_depth = 5.4 - viewPosition.z;",
           "  v_material = a_material;",
+          "  v_part = a_part;",
           "  gl_Position = vec4(clipPosition, clipDepth, viewPosition.z);",
           "}",
         ].join("\n"),
@@ -162,12 +185,15 @@
           "uniform vec2 u_pointer;",
           "uniform float u_hover;",
           "uniform float u_interaction;",
+          "uniform float u_hovered_part;",
+          "uniform float u_part_highlight;",
           "varying vec3 v_normal;",
           "varying vec3 v_world;",
           "varying vec3 v_local;",
           "varying vec3 v_view_direction;",
           "varying float v_depth;",
           "varying float v_material;",
+          "varying float v_part;",
           "void main() {",
           "  vec3 n = normalize(v_normal);",
           "  vec3 viewDirection = normalize(v_view_direction);",
@@ -210,9 +236,26 @@
           "  color += specularColor * (keySpecular * 1.34 + movingSpecular * 0.92 + fillSpecular * 0.24 + clearCoat * 1.35) * shineBoost;",
           "  color += environment * fresnel * (0.25 + metalness * 0.52);",
           "  color += vec3(0.035, 0.085, 0.44) * edgeGlow * (0.18 + u_hover * 0.2);",
+          "  float partMatch = 1.0 - step(0.45, abs(v_part - u_hovered_part));",
+          "  float scan = 0.5 + 0.5 * sin(v_local.y * 19.0 - u_time * 8.0 + v_part * 0.61);",
+          "  float highlightWave = 0.68 + 0.2 * sin(u_time * 5.4 + v_part * 0.47) + scan * 0.12;",
+          "  float selected = partMatch * u_part_highlight;",
+          "  color = mix(color, color * 1.16 + vec3(0.12, 0.2, 0.82), selected * 0.34 * highlightWave);",
+          "  color += selected * (vec3(0.16, 0.28, 1.0) * (0.16 + scan * 0.22) + specularColor * 0.28);",
           "  color *= 0.972 + brushed * 0.024 + grain * 0.018;",
           "  color = pow(color, vec3(0.92));",
           "  gl_FragColor = vec4(color, 0.99);",
+          "}",
+        ].join("\n")
+      );
+
+      pickProgram = createProgramWithSharedVertex(
+        coreProgram,
+        [
+          "precision mediump float;",
+          "varying float v_part;",
+          "void main() {",
+          "  gl_FragColor = vec4(v_part / 255.0, 0.0, 0.0, 1.0);",
           "}",
         ].join("\n")
       );
@@ -233,6 +276,7 @@
       normal: gl.getAttribLocation(coreProgram, "a_normal"),
       explode: gl.getAttribLocation(coreProgram, "a_explode"),
       material: gl.getAttribLocation(coreProgram, "a_material"),
+      part: gl.getAttribLocation(coreProgram, "a_part"),
       aspect: gl.getUniformLocation(coreProgram, "u_aspect"),
       time: gl.getUniformLocation(coreProgram, "u_time"),
       disassembly: gl.getUniformLocation(coreProgram, "u_disassembly"),
@@ -240,6 +284,22 @@
       rotation: gl.getUniformLocation(coreProgram, "u_rotation"),
       hover: gl.getUniformLocation(coreProgram, "u_hover"),
       interaction: gl.getUniformLocation(coreProgram, "u_interaction"),
+      hoveredPart: gl.getUniformLocation(coreProgram, "u_hovered_part"),
+      partHighlight: gl.getUniformLocation(coreProgram, "u_part_highlight"),
+    };
+    var pickLocations = {
+      position: gl.getAttribLocation(pickProgram, "a_position"),
+      normal: gl.getAttribLocation(pickProgram, "a_normal"),
+      explode: gl.getAttribLocation(pickProgram, "a_explode"),
+      material: gl.getAttribLocation(pickProgram, "a_material"),
+      part: gl.getAttribLocation(pickProgram, "a_part"),
+      aspect: gl.getUniformLocation(pickProgram, "u_aspect"),
+      time: gl.getUniformLocation(pickProgram, "u_time"),
+      disassembly: gl.getUniformLocation(pickProgram, "u_disassembly"),
+      pointer: gl.getUniformLocation(pickProgram, "u_pointer"),
+      rotation: gl.getUniformLocation(pickProgram, "u_rotation"),
+      hover: gl.getUniformLocation(pickProgram, "u_hover"),
+      interaction: gl.getUniformLocation(pickProgram, "u_interaction"),
     };
 
     function linePoint(x, lane) {
@@ -298,40 +358,41 @@
       return new Float32Array(vertices);
     }
 
-    function pushMechanicalVertex(target, point, normal, explode, material) {
+    function pushMechanicalVertex(target, point, normal, explode, material, part) {
       target.push(
         point[0], point[1], point[2],
         normal[0], normal[1], normal[2],
         explode[0], explode[1], explode[2],
-        material
+        material,
+        part
       );
     }
 
-    function pushQuad(target, a, b, c, d, normal, explode, material) {
-      pushMechanicalVertex(target, a, normal, explode, material);
-      pushMechanicalVertex(target, b, normal, explode, material);
-      pushMechanicalVertex(target, c, normal, explode, material);
-      pushMechanicalVertex(target, a, normal, explode, material);
-      pushMechanicalVertex(target, c, normal, explode, material);
-      pushMechanicalVertex(target, d, normal, explode, material);
+    function pushQuad(target, a, b, c, d, normal, explode, material, part) {
+      pushMechanicalVertex(target, a, normal, explode, material, part);
+      pushMechanicalVertex(target, b, normal, explode, material, part);
+      pushMechanicalVertex(target, c, normal, explode, material, part);
+      pushMechanicalVertex(target, a, normal, explode, material, part);
+      pushMechanicalVertex(target, c, normal, explode, material, part);
+      pushMechanicalVertex(target, d, normal, explode, material, part);
     }
 
-    function addBox(target, center, size, explode, material) {
+    function addBox(target, center, size, explode, material, part) {
       var x0 = center[0] - size[0] / 2;
       var x1 = center[0] + size[0] / 2;
       var y0 = center[1] - size[1] / 2;
       var y1 = center[1] + size[1] / 2;
       var z0 = center[2] - size[2] / 2;
       var z1 = center[2] + size[2] / 2;
-      pushQuad(target, [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1], explode, material);
-      pushQuad(target, [x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1], explode, material);
-      pushQuad(target, [x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0], explode, material);
-      pushQuad(target, [x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0], explode, material);
-      pushQuad(target, [x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0], [0, 1, 0], explode, material);
-      pushQuad(target, [x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0], explode, material);
+      pushQuad(target, [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1], explode, material, part);
+      pushQuad(target, [x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1], explode, material, part);
+      pushQuad(target, [x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0], explode, material, part);
+      pushQuad(target, [x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0], explode, material, part);
+      pushQuad(target, [x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0], [0, 1, 0], explode, material, part);
+      pushQuad(target, [x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0], explode, material, part);
     }
 
-    function addCylinder(target, center, radius, height, segments, explode, material) {
+    function addCylinder(target, center, radius, height, segments, explode, material, part) {
       var y0 = center[1] - height / 2;
       var y1 = center[1] + height / 2;
       for (var i = 0; i < segments; i++) {
@@ -343,54 +404,66 @@
         var b1 = [center[0] + n1[0] * radius, y0, center[2] + n1[2] * radius];
         var t0 = [b0[0], y1, b0[2]];
         var t1 = [b1[0], y1, b1[2]];
-        pushMechanicalVertex(target, b0, n0, explode, material);
-        pushMechanicalVertex(target, b1, n1, explode, material);
-        pushMechanicalVertex(target, t1, n1, explode, material);
-        pushMechanicalVertex(target, b0, n0, explode, material);
-        pushMechanicalVertex(target, t1, n1, explode, material);
-        pushMechanicalVertex(target, t0, n0, explode, material);
-        pushMechanicalVertex(target, [center[0], y1, center[2]], [0, 1, 0], explode, material);
-        pushMechanicalVertex(target, t0, [0, 1, 0], explode, material);
-        pushMechanicalVertex(target, t1, [0, 1, 0], explode, material);
+        pushMechanicalVertex(target, b0, n0, explode, material, part);
+        pushMechanicalVertex(target, b1, n1, explode, material, part);
+        pushMechanicalVertex(target, t1, n1, explode, material, part);
+        pushMechanicalVertex(target, b0, n0, explode, material, part);
+        pushMechanicalVertex(target, t1, n1, explode, material, part);
+        pushMechanicalVertex(target, t0, n0, explode, material, part);
+        pushMechanicalVertex(target, [center[0], y1, center[2]], [0, 1, 0], explode, material, part);
+        pushMechanicalVertex(target, t0, [0, 1, 0], explode, material, part);
+        pushMechanicalVertex(target, t1, [0, 1, 0], explode, material, part);
       }
     }
 
+    var mechanicalPartCount = 0;
+
     function buildMechanicalGeometry() {
       var vertices = [];
+      var partId = 0;
 
-      /* Separated structural layers communicate a processor, enclosure, and heat sink. */
-      addBox(vertices, [0, -0.54, 0], [1.5, 0.08, 1.08], [0, -0.56, 0], 1);
-      addBox(vertices, [0, -0.35, 0], [1.26, 0.07, 0.9], [0, -0.34, 0], 3);
-      addBox(vertices, [0, -0.16, 0], [1.42, 0.11, 1.05], [0, -0.12, 0], 0);
+      function box(center, size, explode, material) {
+        partId += 1;
+        addBox(vertices, center, size, explode, material, partId);
+      }
+
+      function cylinder(center, radius, height, segments, explode, material) {
+        partId += 1;
+        addCylinder(vertices, center, radius, height, segments, explode, material, partId);
+      }
+
+      /* Every physical primitive receives a stable ID for exact GPU hover picking. */
+      box([0, -0.54, 0], [1.5, 0.08, 1.08], [0, -0.56, 0], 1);
+      box([0, -0.35, 0], [1.26, 0.07, 0.9], [0, -0.34, 0], 3);
+      box([0, -0.16, 0], [1.42, 0.11, 1.05], [0, -0.12, 0], 0);
 
       /* Circuit traces and side connectors. */
       [-0.66, -0.52, 0.52, 0.66].forEach(function (x, index) {
-        addBox(vertices, [x, -0.075, 0], [0.055, 0.024, 0.72], [x * 0.34, 0.02, index % 2 ? 0.12 : -0.12], 2);
+        box([x, -0.075, 0], [0.055, 0.024, 0.72], [x * 0.34, 0.02, index % 2 ? 0.12 : -0.12], 2);
       });
       [-0.34, 0.34].forEach(function (z) {
-        addBox(vertices, [0, -0.07, z], [1.04, 0.025, 0.055], [0, 0.02, z * 0.34], 2);
+        box([0, -0.07, z], [1.04, 0.025, 0.055], [0, 0.02, z * 0.34], 2);
       });
       [-1, 1].forEach(function (side) {
-        addBox(vertices, [side * 0.86, -0.1, -0.28], [0.26, 0.18, 0.25], [side * 0.56, 0.02, -0.12], 1);
-        addBox(vertices, [side * 0.86, -0.1, 0.28], [0.26, 0.18, 0.25], [side * 0.56, 0.02, 0.12], 1);
+        box([side * 0.86, -0.1, -0.28], [0.26, 0.18, 0.25], [side * 0.56, 0.02, -0.12], 1);
+        box([side * 0.86, -0.1, 0.28], [0.26, 0.18, 0.25], [side * 0.56, 0.02, 0.12], 1);
       });
 
       /* Central compute package and ceramic die. */
-      addBox(vertices, [0, 0.02, 0], [0.78, 0.2, 0.68], [0, 0, 0], 2);
-      addBox(vertices, [0, 0.16, 0], [0.46, 0.07, 0.4], [0, 0.16, 0], 3);
+      box([0, 0.02, 0], [0.78, 0.2, 0.68], [0, 0, 0], 2);
+      box([0, 0.16, 0], [0.46, 0.07, 0.4], [0, 0.16, 0], 3);
 
       /* Open retention frame. */
-      addBox(vertices, [-0.62, 0.27, 0], [0.1, 0.08, 0.94], [-0.32, 0.26, 0], 1);
-      addBox(vertices, [0.62, 0.27, 0], [0.1, 0.08, 0.94], [0.32, 0.26, 0], 1);
-      addBox(vertices, [0, 0.27, -0.42], [1.14, 0.08, 0.1], [0, 0.26, -0.26], 1);
-      addBox(vertices, [0, 0.27, 0.42], [1.14, 0.08, 0.1], [0, 0.26, 0.26], 1);
+      box([-0.62, 0.27, 0], [0.1, 0.08, 0.94], [-0.32, 0.26, 0], 1);
+      box([0.62, 0.27, 0], [0.1, 0.08, 0.94], [0.32, 0.26, 0], 1);
+      box([0, 0.27, -0.42], [1.14, 0.08, 0.1], [0, 0.26, -0.26], 1);
+      box([0, 0.27, 0.42], [1.14, 0.08, 0.1], [0, 0.26, 0.26], 1);
 
-      /* Heat-spreader and individually separated fins. */
-      addBox(vertices, [0, 0.43, 0], [1.08, 0.09, 0.76], [0, 0.48, 0], 1);
+      /* Heat-spreader and individually selectable fins. */
+      box([0, 0.43, 0], [1.08, 0.09, 0.76], [0, 0.48, 0], 1);
       for (var fin = -5; fin <= 5; fin++) {
         var fx = fin * 0.095;
-        addBox(
-          vertices,
+        box(
           [fx, 0.68, 0],
           [0.045, 0.44, 0.72],
           [fx * 0.92, 0.72 + Math.abs(fin) * 0.018, fin % 2 === 0 ? 0.12 : -0.12],
@@ -398,13 +471,14 @@
         );
       }
 
-      /* Four mounting screws make the exploded assembly read mechanically. */
+      /* Four mounting screws remain individually selectable. */
       [-0.58, 0.58].forEach(function (x) {
         [-0.4, 0.4].forEach(function (z) {
-          addCylinder(vertices, [x, -0.3, z], 0.055, 0.33, 18, [x * 0.34, -0.38, z * 0.3], 3);
+          cylinder([x, -0.3, z], 0.055, 0.33, 18, [x * 0.34, -0.38, z * 0.3], 3);
         });
       });
 
+      mechanicalPartCount = partId;
       return new Float32Array(vertices);
     }
 
@@ -417,6 +491,16 @@
     gl.bufferData(gl.ARRAY_BUFFER, lineData, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, mechanicalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, mechanicalData, gl.STATIC_DRAW);
+
+    var pickFramebuffer = gl.createFramebuffer();
+    var pickTexture = gl.createTexture();
+    var pickDepthBuffer = gl.createRenderbuffer();
+    gl.bindTexture(gl.TEXTURE_2D, pickTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindTexture(gl.TEXTURE_2D, null);
 
     var pointerTarget = [0, 0];
     var pointer = [0, 0];
@@ -431,11 +515,24 @@
     var dragPointerId = null;
     var dragLast = [0, 0];
     var lastPointerSample = [0, 0];
-    var scrollTarget = 0;
+    var disassemblyTarget = 0;
     var disassembly = 0;
+    var coreEngaged = false;
+    var coreHoverCandidate = false;
+    var pickPosition = [0, 0];
+    var pickRequested = false;
+    var lastPickAt = 0;
+    var lastPickDisassembly = -1;
+    var pickPixel = new Uint8Array(4);
+    var hoveredPart = 0;
+    var partHighlightTarget = 0;
+    var partHighlight = 0;
+    var pickPasses = 0;
+    var pickingAvailable = true;
     var heroRect = null;
     var inView = true;
     var frame = null;
+    var reducedFrame = null;
     var startedAt = performance.now();
     var frameTotal = 0;
     var frameCount = 0;
@@ -445,14 +542,19 @@
     var metrics = {
       renderer: "WebGL",
       powerPreference: "high-performance",
-      shader: "brushed-metal-clearcoat",
+      shader: "brushed-metal-clearcoat-part-picking",
       lineVertices: lineData.length / 3,
-      mechanicalVertices: mechanicalData.length / 10,
+      mechanicalVertices: mechanicalData.length / 11,
+      mechanicalParts: mechanicalPartCount,
       averageFrameMs: 0,
       running: false,
       reducedMotion: reducedMotion.matches,
       mechanicalActive: canvas.clientWidth >= 700,
       disassembly: 0,
+      disassemblyTrigger: "mesh-hover",
+      hoveredPart: 0,
+      partHighlight: 0,
+      pickPasses: 0,
       rotation: [0, 0],
       interaction: 0,
       dragging: false,
@@ -470,17 +572,19 @@
       metrics.lineVertices = lineData.length / 3;
     }
 
-    function updateScrollTarget() {
-      if (!hero) return;
-      var rect = hero.getBoundingClientRect();
-      var progress = clamp((-rect.top + 24) / Math.max(rect.height * 0.74, 1), 0, 1);
-      scrollTarget = reducedMotion.matches ? 0.18 : progress;
-      if (reducedMotion.matches) {
-        disassembly = scrollTarget;
-        render(performance.now());
-      } else {
-        start();
-      }
+    function resizePickBuffer(width, height) {
+      gl.bindTexture(gl.TEXTURE_2D, pickTexture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, pickFramebuffer);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pickTexture, 0);
+      gl.bindRenderbuffer(gl.RENDERBUFFER, pickDepthBuffer);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, pickDepthBuffer);
+      pickingAvailable = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      metrics.pickingAvailable = pickingAvailable;
     }
 
     function resize() {
@@ -494,10 +598,10 @@
         canvas.width = width;
         canvas.height = height;
         gl.viewport(0, 0, width, height);
+        resizePickBuffer(width, height);
       }
       metrics.mechanicalActive = rect.width >= 700;
       rebuildLinesIfNeeded();
-      updateScrollTarget();
     }
 
     function drawLines(time) {
@@ -515,6 +619,112 @@
       gl.drawArrays(gl.LINES, 0, lineData.length / 3);
     }
 
+    function bindMechanicalAttribute(location, size, offset) {
+      if (location < 0) return;
+      gl.enableVertexAttribArray(location);
+      gl.vertexAttribPointer(location, size, gl.FLOAT, false, 44, offset);
+    }
+
+    function bindMechanicalAttributes(locations) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, mechanicalBuffer);
+      bindMechanicalAttribute(locations.position, 3, 0);
+      bindMechanicalAttribute(locations.normal, 3, 12);
+      bindMechanicalAttribute(locations.explode, 3, 24);
+      bindMechanicalAttribute(locations.material, 1, 36);
+      bindMechanicalAttribute(locations.part, 1, 40);
+    }
+
+    function setMechanicalTransformUniforms(locations, time) {
+      gl.uniform1f(locations.aspect, canvas.width / canvas.height);
+      gl.uniform1f(locations.time, time);
+      gl.uniform1f(locations.disassembly, disassembly);
+      gl.uniform2f(locations.pointer, pointer[0], pointer[1]);
+      gl.uniform2f(locations.rotation, rotation[0], rotation[1]);
+      gl.uniform1f(locations.hover, hover);
+      gl.uniform1f(locations.interaction, interaction);
+    }
+
+    function setHoveredPart(nextPart) {
+      var validPart = nextPart >= 1 && nextPart <= mechanicalPartCount ? nextPart : 0;
+      if (validPart === hoveredPart) return;
+      hoveredPart = validPart;
+      partHighlight = 0;
+      partHighlightTarget = validPart > 0 ? 1 : 0;
+      if (hero) hero.classList.toggle("is-core-part-hovered", validPart > 0);
+      if (reducedMotion.matches) {
+        partHighlight = partHighlightTarget;
+        requestReducedFrame();
+      }
+    }
+
+    function engageCore() {
+      if (coreEngaged) return;
+      coreEngaged = true;
+      disassemblyTarget = 1;
+      hoverTarget = 1;
+      interactionTarget = 1;
+      if (hero) hero.classList.add("is-core-hovered");
+      if (reducedMotion.matches) {
+        disassembly = 1;
+        hover = 1;
+        requestReducedFrame();
+      } else {
+        start();
+      }
+    }
+
+    function disengageCore() {
+      coreEngaged = false;
+      disassemblyTarget = 0;
+      hoverTarget = 0;
+      pickRequested = false;
+      setHoveredPart(0);
+      if (hero) {
+        hero.classList.remove("is-core-hovered");
+        hero.classList.remove("is-core-interacting");
+      }
+      if (reducedMotion.matches) {
+        disassembly = 0;
+        hover = 0;
+        requestReducedFrame();
+      }
+    }
+
+    function drawPickPass(time, now) {
+      if (!pickRequested || !pickingAvailable || !metrics.mechanicalActive) return;
+      if (!reducedMotion.matches && now - lastPickAt < 34) return;
+
+      pickRequested = false;
+      lastPickAt = now;
+      lastPickDisassembly = disassembly;
+      var pixelX = clamp(Math.floor(pickPosition[0] * canvas.width), 0, canvas.width - 1);
+      var pixelY = clamp(Math.floor((1 - pickPosition[1]) * canvas.height), 0, canvas.height - 1);
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, pickFramebuffer);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.enable(gl.SCISSOR_TEST);
+      gl.scissor(pixelX, pixelY, 1, 1);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.useProgram(pickProgram);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
+      gl.disable(gl.BLEND);
+      bindMechanicalAttributes(pickLocations);
+      setMechanicalTransformUniforms(pickLocations, time);
+      gl.drawArrays(gl.TRIANGLES, 0, mechanicalData.length / 11);
+      gl.readPixels(pixelX, pixelY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickPixel);
+      gl.disable(gl.SCISSOR_TEST);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      pickPasses += 1;
+
+      var pickedPart = pickPixel[0];
+      if (!coreEngaged && coreHoverCandidate && pickedPart > 0) engageCore();
+      if (coreEngaged && disassembly > 0.38) setHoveredPart(pickedPart);
+      else setHoveredPart(0);
+    }
+
     function drawMechanicalCore(time) {
       if (!metrics.mechanicalActive) return;
       gl.useProgram(coreProgram);
@@ -522,24 +732,11 @@
       gl.depthFunc(gl.LEQUAL);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      gl.bindBuffer(gl.ARRAY_BUFFER, mechanicalBuffer);
-
-      gl.enableVertexAttribArray(coreLocations.position);
-      gl.enableVertexAttribArray(coreLocations.normal);
-      gl.enableVertexAttribArray(coreLocations.explode);
-      gl.enableVertexAttribArray(coreLocations.material);
-      gl.vertexAttribPointer(coreLocations.position, 3, gl.FLOAT, false, 40, 0);
-      gl.vertexAttribPointer(coreLocations.normal, 3, gl.FLOAT, false, 40, 12);
-      gl.vertexAttribPointer(coreLocations.explode, 3, gl.FLOAT, false, 40, 24);
-      gl.vertexAttribPointer(coreLocations.material, 1, gl.FLOAT, false, 40, 36);
-      gl.uniform1f(coreLocations.aspect, canvas.width / canvas.height);
-      gl.uniform1f(coreLocations.time, time);
-      gl.uniform1f(coreLocations.disassembly, disassembly);
-      gl.uniform2f(coreLocations.pointer, pointer[0], pointer[1]);
-      gl.uniform2f(coreLocations.rotation, rotation[0], rotation[1]);
-      gl.uniform1f(coreLocations.hover, hover);
-      gl.uniform1f(coreLocations.interaction, interaction);
-      gl.drawArrays(gl.TRIANGLES, 0, mechanicalData.length / 10);
+      bindMechanicalAttributes(coreLocations);
+      setMechanicalTransformUniforms(coreLocations, time);
+      gl.uniform1f(coreLocations.hoveredPart, hoveredPart);
+      gl.uniform1f(coreLocations.partHighlight, partHighlight);
+      gl.drawArrays(gl.TRIANGLES, 0, mechanicalData.length / 11);
     }
 
     function render(now) {
@@ -556,16 +753,31 @@
       hover += (hoverTarget - hover) * 0.085;
       interaction += (interactionTarget - interaction) * 0.16;
       interactionTarget *= 0.925;
+      partHighlight += (partHighlightTarget - partHighlight) * 0.17;
       rotationTarget[0] = clamp(rotationTarget[0], -0.32, 0.32);
       rotationTarget[1] = clamp(rotationTarget[1], -0.68, 0.68);
-      disassembly += (scrollTarget - disassembly) * 0.075;
+      disassembly += (disassemblyTarget - disassembly) * 0.064;
       var elapsed = (now - startedAt) / 1000;
+
+      if (
+        coreEngaged &&
+        coreHoverCandidate &&
+        (Math.abs(disassembly - lastPickDisassembly) > 0.018 || dragging)
+      ) {
+        pickRequested = true;
+      }
 
       gl.clearColor(0.043, 0.047, 0.047, 1);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       drawLines(elapsed);
       drawMechanicalCore(elapsed);
+      drawPickPass(elapsed, now);
       metrics.disassembly = Number(disassembly.toFixed(3));
+      metrics.disassemblyTarget = disassemblyTarget;
+      metrics.coreEngaged = coreEngaged;
+      metrics.hoveredPart = hoveredPart;
+      metrics.partHighlight = Number(partHighlight.toFixed(3));
+      metrics.pickPasses = pickPasses;
       metrics.rotation = [Number(rotation[0].toFixed(3)), Number(rotation[1].toFixed(3))];
       metrics.hover = Number(hover.toFixed(3));
       metrics.interaction = Number(interaction.toFixed(3));
@@ -595,9 +807,18 @@
       frame = requestAnimationFrame(loop);
     }
 
+    function requestReducedFrame() {
+      if (!reducedMotion.matches || reducedFrame !== null || !inView || document.hidden) return;
+      reducedFrame = requestAnimationFrame(function (now) {
+        reducedFrame = null;
+        render(now);
+        metrics.running = false;
+      });
+    }
+
     function start() {
       if (reducedMotion.matches) {
-        render(performance.now());
+        requestReducedFrame();
         metrics.running = false;
         return;
       }
@@ -609,7 +830,9 @@
 
     function stop() {
       if (frame !== null) cancelAnimationFrame(frame);
+      if (reducedFrame !== null) cancelAnimationFrame(reducedFrame);
       frame = null;
+      reducedFrame = null;
       metrics.running = false;
     }
 
@@ -621,28 +844,45 @@
       }, { passive: true });
       hero.addEventListener("pointermove", function (event) {
         var rect = heroRect || hero.getBoundingClientRect();
-        pointerTarget[0] = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-        pointerTarget[1] = -((event.clientY - rect.top) / rect.height - 0.5) * 2;
+        var normalizedX = (event.clientX - rect.left) / rect.width;
+        var normalizedY = (event.clientY - rect.top) / rect.height;
+        pointerTarget[0] = (normalizedX - 0.5) * 2;
+        pointerTarget[1] = -(normalizedY - 0.5) * 2;
+        pickPosition[0] = normalizedX;
+        pickPosition[1] = normalizedY;
         var pointerDeltaX = event.clientX - lastPointerSample[0];
         var pointerDeltaY = event.clientY - lastPointerSample[1];
         var pointerSpeed = Math.sqrt(pointerDeltaX * pointerDeltaX + pointerDeltaY * pointerDeltaY);
         interactionTarget = Math.max(interactionTarget, clamp(pointerSpeed / 36, 0, 0.76));
-        hoverTarget = pointerTarget[0] > 0.12 && Math.abs(pointerTarget[1]) < 0.82 ? 1 : 0;
+        coreHoverCandidate = normalizedX > 0.46 && normalizedX < 0.99 && normalizedY > 0.035 && normalizedY < 0.92;
+        if (coreHoverCandidate) {
+          pickRequested = true;
+          if (coreEngaged) {
+            disassemblyTarget = 1;
+            hoverTarget = 1;
+          }
+        } else if (!dragging) {
+          disengageCore();
+        }
         lastPointerSample[0] = event.clientX;
         lastPointerSample[1] = event.clientY;
+        if (reducedMotion.matches) {
+          pointer[0] = pointerTarget[0];
+          pointer[1] = pointerTarget[1];
+          requestReducedFrame();
+        }
       }, { passive: true });
       hero.addEventListener("pointerleave", function () {
         if (dragging) return;
+        coreHoverCandidate = false;
         pointerTarget[0] = 0;
         pointerTarget[1] = 0;
-        hoverTarget = 0;
+        disengageCore();
       }, { passive: true });
     }
 
     function beginCoreDrag(event) {
-      if (!finePointer || reducedMotion.matches || !metrics.mechanicalActive || event.button !== 0) return;
-      var rect = canvas.getBoundingClientRect();
-      if (event.clientX < rect.left + rect.width * 0.5) return;
+      if (!finePointer || reducedMotion.matches || !metrics.mechanicalActive || !coreEngaged || event.button !== 0) return;
       event.preventDefault();
       dragging = true;
       dragPointerId = event.pointerId;
@@ -652,6 +892,7 @@
       angularVelocity[1] = 0;
       interactionTarget = 1;
       hoverTarget = 1;
+      disassemblyTarget = 1;
       canvas.setPointerCapture(event.pointerId);
       if (hero) hero.classList.add("is-core-interacting");
     }
@@ -676,6 +917,7 @@
       dragPointerId = null;
       interactionTarget = Math.max(interactionTarget, 0.58);
       if (hero) hero.classList.remove("is-core-interacting");
+      if (!coreHoverCandidate) disengageCore();
     }
 
     if (finePointer) {
@@ -684,8 +926,7 @@
       canvas.addEventListener("pointerup", endCoreDrag);
       canvas.addEventListener("pointercancel", endCoreDrag);
       canvas.addEventListener("dblclick", function (event) {
-        var rect = canvas.getBoundingClientRect();
-        if (event.clientX < rect.left + rect.width * 0.5 || reducedMotion.matches) return;
+        if (!coreEngaged || reducedMotion.matches) return;
         rotationTarget[0] = 0;
         rotationTarget[1] = 0;
         angularVelocity[0] = 0;
@@ -694,12 +935,14 @@
       });
     }
 
-    window.addEventListener("scroll", updateScrollTarget, { passive: true });
-
     if ("IntersectionObserver" in window && hero) {
       new IntersectionObserver(function (entries) {
         inView = entries[0].isIntersecting;
-        if (inView) start(); else stop();
+        if (inView) start();
+        else {
+          disengageCore();
+          stop();
+        }
       }, { rootMargin: "160px 0px" }).observe(hero);
     }
 
@@ -711,7 +954,10 @@
       reducedMotion.addEventListener("change", function () {
         metrics.reducedMotion = reducedMotion.matches;
         stop();
-        updateScrollTarget();
+        if (reducedMotion.matches) {
+          disassembly = disassemblyTarget;
+          hover = hoverTarget;
+        }
         start();
       });
     }
@@ -732,7 +978,6 @@
     });
 
     resize();
-    updateScrollTarget();
     render(performance.now());
     start();
   }
