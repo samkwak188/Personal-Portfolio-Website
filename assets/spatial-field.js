@@ -523,6 +523,9 @@
     var pickRequested = false;
     var lastPickAt = 0;
     var lastPickDisassembly = -1;
+    var partMissStartedAt = 0;
+    var partMissGraceMs = 85;
+    var disassemblyTimeConstant = 0.44;
     var pickPixel = new Uint8Array(4);
     var hoveredPart = 0;
     var partHighlightTarget = 0;
@@ -555,6 +558,8 @@
       hoveredPart: 0,
       partHighlight: 0,
       pickPasses: 0,
+      partMissGraceMs: partMissGraceMs,
+      disassemblyTimeConstantMs: disassemblyTimeConstant * 1000,
       rotation: [0, 0],
       interaction: 0,
       dragging: false,
@@ -660,6 +665,7 @@
     function engageCore() {
       if (coreEngaged) return;
       coreEngaged = true;
+      partMissStartedAt = 0;
       disassemblyTarget = 1;
       hoverTarget = 1;
       interactionTarget = 1;
@@ -675,6 +681,7 @@
 
     function disengageCore() {
       coreEngaged = false;
+      partMissStartedAt = 0;
       disassemblyTarget = 0;
       hoverTarget = 0;
       pickRequested = false;
@@ -721,8 +728,25 @@
 
       var pickedPart = pickPixel[0];
       if (!coreEngaged && coreHoverCandidate && pickedPart > 0) engageCore();
-      if (coreEngaged && disassembly > 0.38) setHoveredPart(pickedPart);
-      else setHoveredPart(0);
+      if (coreEngaged && disassembly > 0.38) {
+        if (pickedPart > 0) {
+          partMissStartedAt = 0;
+          setHoveredPart(pickedPart);
+        } else {
+          setHoveredPart(0);
+          if (dragging) {
+            partMissStartedAt = 0;
+          } else if (reducedMotion.matches) {
+            disengageCore();
+          } else {
+            if (!partMissStartedAt) partMissStartedAt = now;
+            if (now - partMissStartedAt >= partMissGraceMs) disengageCore();
+            else pickRequested = true;
+          }
+        }
+      } else {
+        setHoveredPart(0);
+      }
     }
 
     function drawMechanicalCore(time) {
@@ -740,6 +764,7 @@
     }
 
     function render(now) {
+      var frameSeconds = clamp((now - lastFrameAt) / 1000, 1 / 240, 0.05);
       pointer[0] += (pointerTarget[0] - pointer[0]) * 0.07;
       pointer[1] += (pointerTarget[1] - pointer[1]) * 0.07;
       if (!dragging) {
@@ -756,7 +781,8 @@
       partHighlight += (partHighlightTarget - partHighlight) * 0.17;
       rotationTarget[0] = clamp(rotationTarget[0], -0.32, 0.32);
       rotationTarget[1] = clamp(rotationTarget[1], -0.68, 0.68);
-      disassembly += (disassemblyTarget - disassembly) * 0.064;
+      var disassemblyStep = 1 - Math.exp(-frameSeconds / disassemblyTimeConstant);
+      disassembly += (disassemblyTarget - disassembly) * disassemblyStep;
       var elapsed = (now - startedAt) / 1000;
 
       if (

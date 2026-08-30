@@ -149,8 +149,10 @@ This revision supersedes the scroll-driven disassembly behavior recorded in the 
 
 - Accepted assembled hero: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\shiny-core-idle.png`
 - Final assembled state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-initial.png`
+- Final opening state at 250 ms: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-opening-250ms.png`
 - First independently highlighted part: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-first-highlight.png`
 - Second independently highlighted part: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-second-highlight.png`
+- Final reassembly state 180 ms after entering empty space: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-reassembling-180ms.png`
 - Final collapsed state after pointer exit: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-collapsed.png`
 - Final mobile state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\hover-parts-mobile.png`
 - Browser fallback: Playwright drove installed Chrome because no Browser/IAB tool was available. Desktop used 1487 x 1058 CSS pixels; mobile used 390 x 844 CSS pixels.
@@ -158,10 +160,11 @@ This revision supersedes the scroll-driven disassembly behavior recorded in the 
 ### Fidelity ledger
 
 - Copy and composition: the headline, supporting copy, navigation, links, hero curve, field geometry, assembled model scale, and About transition are unchanged. Above-the-fold copy diff: zero.
-- Trigger behavior: scrolling from the top to 340 px leaves disassembly exactly at `0`. A GPU-confirmed hit on the assembled mesh changes the target from `0` to `1`; leaving the expanded model envelope returns it to `0`.
+- Trigger behavior: scrolling from the top to 340 px leaves disassembly exactly at `0`. A GPU-confirmed hit on the assembled mesh changes the target from `0` to `1`. A GPU miss on empty space, including empty space inside the model's broader interaction area, clears the selected part and returns the target to `0` after an 85 ms edge-flicker tolerance.
+- Motion timing: disassembly and reassembly now share frame-rate-independent exponential easing with a 440 ms time constant. The final automated run measured opening near `0.52` at 250 ms, `0.89` at 600 ms, and `0.99` after the full settle; after entering empty space it measured a live closing state near `0.14` at 600 ms and `0.004` after settling.
 - Separation density: the final exploded displacement is 72% of the initial hover-disassembly pass. Layer and fin gaps remain visually distinct and independently targetable, while the silhouette stays compact on the right side of the hero.
 - Part behavior: all 35 mechanical primitives carry stable GPU part IDs. The final automated pass resolved part 22 and adjacent part 23 at distinct pointer positions; each reached an independent highlight intensity of `1.0` while the assembly remained open.
-- Highlight treatment: only the frontmost visible picked primitive receives the animated cobalt-white scan and specular lift. Empty space clears the part highlight without prematurely collapsing the model.
+- Highlight treatment: only the frontmost visible picked primitive receives the animated cobalt-white scan and specular lift. Empty space clears the part highlight and begins the slower reassembly; active pointer capture keeps drag rotation from collapsing mid-gesture.
 - Direct manipulation: click-drag remains available after engagement. The verified drag changed rotation from `[0, 0]` to approximately `[0.104, 0.303]`, used the `grabbing` cursor while active, and kept disassembly at `1`.
 - Responsive and accessibility behavior: the mechanical mesh remains disabled below 700 px. Reduced-motion uses event-driven static frames, snaps hover disassembly/highlight on and off, and does not run a continuous animation loop.
 - Rendering: the visible scene remains two continuous GPU draw calls with static geometry buffers. Frontmost-part resolution uses a scissored one-pixel WebGL ID pass only while the pointer or exploded geometry changes; it does not perform a CPU raycast.
