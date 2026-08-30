@@ -179,6 +179,25 @@ body.menu-open .site-header {
     transform: translateZ(0);
 }
 
+@media (pointer: fine) and (min-width: 700px) {
+    .spatial-field {
+        cursor: grab;
+        touch-action: pan-y;
+    }
+
+    .hero-inner {
+        pointer-events: none;
+    }
+
+    .hero-content {
+        pointer-events: auto;
+    }
+
+    .hero.is-core-interacting .spatial-field {
+        cursor: grabbing;
+    }
+}
+
 .hero-inner {
     position: relative;
     z-index: 1;
@@ -1225,5 +1244,9 @@ body.menu-open .site-header {
     .skill-stage,
     .skill-tab {
         transform: none !important;
+    }
+
+    .spatial-field {
+        cursor: default;
     }
 }

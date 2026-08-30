@@ -111,3 +111,32 @@
 8. The current-run audit identified two blocking mismatches: Ekua showed a different product, and independent section/gap values created excessive and inconsistent whitespace. The first implementation replaced the card with authenticated repository evidence and introduced a shared cadence. Browser QA then found 7-32 px of hidden overflow in the five mobile skill panels after the density reduction. The mobile panel gap and row padding were tightened, all five panels were reopened, and the final pass measured zero overflow. The same pass retained the original 3D project interaction and produced the final matched before/after evidence above.
 
 final result: passed
+
+## Metallic shader and core interaction revision
+
+### Evidence
+
+- Accepted pre-revision hero: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\revision-3d-hero-desktop.png`
+- Final assembled shader state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\shiny-core-idle.png`
+- Final pointer-hover state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\shiny-core-hover.png`
+- Final click-drag rotation state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\shiny-core-dragged.png`
+- Final scroll-disassembled state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\shiny-core-disassembled.png`
+- Final mobile state: `C:\Users\Lab User\AppData\Local\Temp\portfolio-build-20260829\captures\shiny-core-mobile.png`
+- Browser fallback: Playwright drove installed Chrome because no Browser/IAB tool was available. Desktop used 1487 x 1058 CSS pixels; mobile used 390 x 844 CSS pixels.
+
+### Fidelity ledger
+
+- Copy and hierarchy: the headline, support copy, links, availability line, navigation, and About transition are unchanged. Above-the-fold copy diff: zero additions, removals, renames, or reorderings.
+- Composition: the core retains its original right-side scale, three-quarter default view, field geometry, hero curve, and separation from the headline.
+- Material treatment: the previous flat specular pass is replaced by a brushed-metal and clear-coat shader with material-specific roughness, metalness, Fresnel reflections, cobalt horizon light, and two moving specular sources.
+- Interaction: pointer position now drives both camera parallax and the reflected light. Hover lifts and brightens the assembly; click-drag rotates it within restrained pitch/yaw bounds; double-click returns it to the designed default orientation; scroll continues to control disassembly.
+- Responsive and accessibility behavior: the mechanical mesh remains disabled below 700 px, the mobile field and content are unchanged, and reduced-motion renders one static frame with no drag cursor or animation loop.
+- Rendering: the revision keeps the existing two GPU draw calls and static buffers. Chrome reported the WebGL shader as linked, no WebGL/page/console errors, no horizontal overflow, and an 11.11 ms average frame interval in the automated sample.
+
+### Interaction verification
+
+- Hover reached `1.0`, drag changed rotation from `[0, 0]` to approximately `[-0.303, 0.531]`, the cursor changed from `grab` to `grabbing` during capture, and scrolling changed disassembly from `0.037` to `0.558`.
+- Desktop, mobile, and reduced-motion responses all returned HTTP 200. The hero title measured zero horizontal overflow in every state.
+- No material mismatch remains. The only intentional visual change from the accepted hero is the user-requested shinier surface and richer direct manipulation.
+
+final result: passed
